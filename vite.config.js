@@ -5,7 +5,7 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(),tailwindcss()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -18,7 +18,10 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'devserver-preview--elportfoliotania.netlify.app'
-    ]
-  }
+      'devserver-preview--elportfoliotania.netlify.app',
+      // add other allowed hosts if needed
+    ],
+    // ...other server options
+  },
+  // ...other config
 })
