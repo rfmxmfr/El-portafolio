@@ -1,5 +1,7 @@
 # Fashion Design Portfolio - El Portafolio
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/5afa8382-16a0-48cb-bff9-d4875faec0cb/deploy-status)](https://app.netlify.com/projects/el-portfafolio/deploys)
+
 ## Package Contents
 
 This comprehensive fashion design portfolio package includes everything you need to create a professional, editable portfolio. The package contains original content, design concepts, and detailed guidelines for customization.
@@ -53,6 +55,9 @@ This comprehensive fashion design portfolio package includes everything you need
 4. Access the admin dashboard at `/admin`
 5. Customize the content and styling as needed
 6. Deploy to a web hosting service for online access
+
+### Live Demo
+The portfolio is deployed and available at: [https://el-portfafolio.netlify.app](https://el-portfafolio.netlify.app)
 
 ## 📞 Support
 
