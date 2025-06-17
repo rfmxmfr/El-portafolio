@@ -4,15 +4,8 @@
 echo "Building the project..."
 npm run build
 
-# Check if Netlify CLI is installed
-if ! command -v netlify &> /dev/null
-then
-    echo "Netlify CLI not found, installing..."
-    npm install -g netlify-cli
-fi
-
-# Deploy to Netlify
+# Deploy to Netlify using npx (no global installation needed)
 echo "Deploying to Netlify..."
-netlify deploy --prod --dir=dist
+npx netlify-cli deploy --prod --dir=dist
 
 echo "Deployment complete!"

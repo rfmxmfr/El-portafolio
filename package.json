@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "./deploy.sh"
+    "deploy": "./deploy.sh",
+    "netlify": "npx netlify-cli deploy --prod --dir=dist"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
