@@ -18,11 +18,7 @@ export default defineConfig({
   },
   server: {
     allowedHosts: [
-      'localhost',
-      '127.0.0.1',
-      'devserver-preview--elportfoliotania.netlify.app',
-      'el-portfafolio.netlify.app',
-      '*.netlify.app'
+      'devserver-preview--elportfoliotania.netlify.app'
     ]
   }
 })
