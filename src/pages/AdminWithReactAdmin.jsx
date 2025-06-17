@@ -1,4 +1,0 @@
-import React, { Suspense } from 'react';
-
-// Create a fallback component
-const AdminFallback = () => (\n  <div className=\"p-8 text-center\">\n    <h2 className=\"text-xl font-medium mb-4\">Loading Admin Interface...</h2>\n    <p>Please wait while the admin components are being loaded.</p>\n  </div>\n);\n\n// Use dynamic import to load react-admin components only when needed\nconst AdminComponent = React.lazy(() => import('../components/admin/ReactAdminWrapper'));\n\nexport default function AdminWithReactAdmin() {\n  return (\n    <Suspense fallback={<AdminFallback />}>\n      <AdminComponent />\n    </Suspense>\n  );\n}

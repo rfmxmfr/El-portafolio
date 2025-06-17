@@ -1,0 +1,36 @@
+{
+  "common": {
+    "close": "Cerrar",
+    "create": "Crear",
+    "save": "Guardar",
+    "cancel": "Cancelar"
+  },
+  "dashboard": {
+    "title": "Panel de Administración",
+    "tabs": {
+      "collections": "Colecciones",
+      "design": "Asistente de Diseño",
+      "trends": "Análisis de Tendencias"
+    }
+  },
+  "collections": {
+    "title": "Gestión de Colecciones",
+    "newCollection": "Nombre de la Nueva Colección",
+    "items": "{{count}} elementos",
+    "analyzeWithAI": "Analizar con IA",
+    "noCollections": "No hay colecciones aún"
+  },
+  "design": {
+    "title": "Asistente de Diseño",
+    "promptPlaceholder": "Describe tus requisitos de diseño...",
+    "generate": "Generar Sugerencias",
+    "suggestion": "Sugerencia {{number}}"
+  },
+  "trends": {
+    "title": "Análisis de Tendencias",
+    "uploadImages": "Subir Imágenes",
+    "uploadInstructions": "Selecciona múltiples imágenes de moda para el análisis de tendencias",
+    "analyze": "Analizar Tendencias",
+    "results": "Resultados del Análisis"
+  }
+}

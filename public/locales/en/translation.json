@@ -1,0 +1,43 @@
+{
+  "common": {
+    "close": "Close",
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel",
+    "home": {
+      "welcome": "Welcome to Tania Atelier",
+      "tagline": "Where fashion meets innovation",
+      "explore": "Explore Collections"
+    },
+    "adminPanel": "Admin Panel",
+    "loading": "Loading..."
+  },
+  "dashboard": {
+    "title": "Admin Dashboard",
+    "tabs": {
+      "collections": "Collections",
+      "design": "Design Assistant",
+      "trends": "Trend Analysis"
+    }
+  },
+  "collections": {
+    "title": "Collection Management",
+    "newCollection": "New Collection Name",
+    "items": "{{count}} items",
+    "analyzeWithAI": "Analyze with AI",
+    "noCollections": "No collections yet"
+  },
+  "design": {
+    "title": "Design Assistant",
+    "promptPlaceholder": "Describe your design requirements...",
+    "generate": "Generate Suggestions",
+    "suggestion": "Suggestion {{number}}"
+  },
+  "trends": {
+    "title": "Trend Analysis",
+    "uploadImages": "Upload Images",
+    "uploadInstructions": "Select multiple fashion images for trend analysis",
+    "analyze": "Analyze Trends",
+    "results": "Analysis Results"
+  }
+}

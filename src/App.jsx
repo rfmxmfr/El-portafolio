@@ -1,47 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Button } from './components/ui/button.jsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card.jsx'
+import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card.jsx'
 import { Badge } from './components/ui/badge.jsx'
 import { Separator } from './components/ui/separator.jsx'
-import { Mail, Phone, Instagram, Linkedin, Eye, Palette, Scissors, Sparkles } from 'lucide-react'
+import { Mail, Phone, Instagram, Linkedin, Eye, Palette, Scissors, Sparkles, CheckCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { editableContentStorage, optimizeImageUrl } from './lib/utils'
-import FullPageFlip from './components/FullPageFlip'
+import { editableContentStorage } from './lib/utils'
 import './App.css'
-
-// Error boundary component
-function ErrorBoundary({ children }) {
-  const [hasError, setHasError] = useState(false);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const errorHandler = (error) => {
-      setHasError(true);
-      setError(error);
-      console.error('UI Error caught:', error);
-    };
-
-    window.addEventListener('error', errorHandler);
-    return () => window.removeEventListener('error', errorHandler);
-  }, []);
-
-  if (hasError) {
-    return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-md m-4">
-        <h2 className="text-xl font-medium text-red-600 mb-2">Something went wrong</h2>
-        <p className="text-red-500 mb-4">The application encountered an error. Please try refreshing the page.</p>
-        <Button 
-          onClick={() => window.location.reload()} 
-          className="bg-red-600 hover:bg-red-700 text-white"
-        >
-          Refresh Page
-        </Button>
-      </div>
-    );
-  }
-
-  return children;
-}
+import ErrorBoundary from './components/ErrorBoundary'
+import LoadingSpinner from './components/LoadingSpinner'
+import AnimatedAdminDashboard from './components/AnimatedAdminDashboard'
 
 // Import assets
 import moodBoard1 from './assets/mood_board_1.png'
@@ -50,6 +18,7 @@ import fashionSketch1 from './assets/fashion_sketch_1.png'
 import fashionSketch2 from './assets/fashion_sketch_2.png'
 import technicalDrawing1 from './assets/technical_drawing_1.png'
 import technicalDrawing2 from './assets/technical_drawing_2.png'
+import robinxTania from './assets/robinxTania.jpg'
 
 function App() {
   const { t } = useTranslation()
@@ -57,109 +26,82 @@ function App() {
   const [aboutContent, setAboutContent] = useState({
     paragraphs: [
       'With a passion for sustainable fashion and innovative design, I create collections that bridge the gap between contemporary aesthetics and timeless appeal. My work focuses on clean silhouettes, quality materials, and versatile pieces that empower the modern individual.',
-      'Drawing inspiration from minimalist architecture, natural textures, and cultural diversity, each design reflects a commitment to both style and substance. I believe fashion should be both beautiful and responsible, creating pieces that last beyond seasonal trends.'
-    ],
-    media: []
-  })
 
-  useEffect(() => {
-    const storedContent = editableContentStorage.load('aboutDesigner', null)
-    if (storedContent) {
-      setAboutContent(storedContent)
-    }
-  }, [])
+  const handleAdminClick = () => {
+    setIsOpen(true);
+  };
 
-  const sections = [
-    { id: 'home', label: 'Home', icon: Eye },
-    { id: 'about', label: 'About', icon: Sparkles },
-    { id: 'collections', label: 'Collections', icon: Palette },
-    { id: 'technical', label: 'Technical', icon: Scissors },
-    { id: 'contact', label: 'Contact', icon: Mail }
-  ]
-
-  const collections = [
-    {
-      id: 'minimalist',
-      title: 'Minimalist Essentials',
-      description: 'Clean lines, neutral tones, and timeless silhouettes for the modern professional.',
-      moodBoard: moodBoard1,
-      sketch: fashionSketch1,
-      tags: ['Minimalist', 'Professional', 'Sustainable']
-    },
-    {
-      id: 'maximalist',
-      title: 'Vibrant Expression',
-      description: 'Bold colors, dramatic textures, and statement pieces for the confident individual.',
-      moodBoard: moodBoard2,
-      sketch: fashionSketch2,
-      tags: ['Bold', 'Luxury', 'Statement']
-    }
-  ]
-
-  const technicalDrawings = [
-    {
-      id: 'blazer',
-      title: 'Oversized Linen Blazer',
-      description: 'Technical specifications for a relaxed-fit blazer with notched lapels and single-button closure.',
-      image: technicalDrawing1,
-      details: ['Notched lapels', 'Single button closure', 'Flap pockets', 'Relaxed fit']
-    },
-    {
-      id: 'blouse',
-      title: 'Ruffled Silk Blouse',
-      description: 'Technical specifications for a dramatic blouse with V-neck and ruffled details.',
-      image: technicalDrawing2,
-      details: ['V-neck design', 'Ruffled sleeves', 'Loose fit', 'Silk construction']
-    }
-  ]
+  const handleClose = () => {
+    setIsOpen(false);
+  };
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100">
-        {/* Navigation */}
+    <div className="min-h-screen bg-neutral-50">
+      {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-200">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-neutral-900">{t('TANIA ATELIER')}</h1>
-            <div className="flex space-x-6">
-              {sections.map((section) => {
-                const Icon = section.icon
-                return (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
-                      activeSection === section.id
-                        ? 'bg-neutral-900 text-white'
-                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
-                    }`}
-                  >
-                    <Icon size={16} />
-                    <span className="hidden md:inline">{t(section.label)}</span>
-                  </button>
-                )
-              })}
+            <div className="flex items-center gap-4">
+              <Button variant="outline" onClick={handleAdminClick}>
+                {t('common.adminPanel')}
+              </Button>
             </div>
           </div>
         </div>
       </nav>
 
+      {/* Hero Section with RobinxTania Image */}
+      {activeSection === 'home' && (
+        <div className="relative h-[80vh] mb-12">
+          <div className="absolute inset-0">
+            <img
+              src={robinxTania}
+              alt="RobinxTania"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-neutral-900/50 to-transparent" />
+          </div>
+          <div className="relative max-w-6xl mx-auto h-full flex items-center px-6">
+            <div className="text-white z-10">
+              <h1 className="text-5xl md:text-7xl font-bold mb-6">{t('home.welcome')}</h1>
+              <p className="text-2xl md:text-3xl mb-8">{t('home.tagline')}</p>
+              <Button size="lg" className="bg-white text-black hover:bg-neutral-100">
+                {t('home.explore')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="pt-20">
-        {/* Home Section */}
-        {activeSection === 'home' && (
-          <FullPageFlip onExplore={() => setActiveSection('collections')} />
-        )}
-
-        {/* About Section */}
-        {activeSection === 'about' && (
-          <section className="min-h-screen py-20 px-6">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-4xl font-light text-neutral-900 mb-12 text-center">{t('About the Designer')}</h2>
-              <Card className="bg-white/60 backdrop-blur-sm border-neutral-200">
-                <CardContent className="p-8">
-                  {aboutContent.paragraphs.map((paragraph, index) => (
-                    <div key={index} className="mb-6">
+        {/* Admin Dashboard */}
+        {isOpen && (
+          <EnhancedAdminDashboard onClose={handleClose} />
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="text-center">
+                        <Palette className="mx-auto mb-3 text-neutral-600" size={32} />
+                        <h3 className="font-semibold text-neutral-900 mb-2">{t('Creative Vision')}</h3>
+                        <p className="text-neutral-600">{t('Innovative designs that push boundaries')}</p>
+                      </div>
+                      <div className="text-center">
+                        <Sparkles className="mx-auto mb-3 text-neutral-600" size={32} />
+                        <h3 className="font-semibold text-neutral-900 mb-2">{t('Sustainability')}</h3>
+                        <p className="text-neutral-600">{t('Conscious choices for a better future')}</p>
+                      </div>
+                      <div className="text-center">
+                        <Scissors className="mx-auto mb-3 text-neutral-600" size={32} />
+                        <h3 className="font-semibold text-neutral-900 mb-2">{t('Craftsmanship')}</h3>
+                        <p className="text-neutral-600">{t('Attention to detail in every piece')}</p>
+                      </div>
                       <p className="text-lg text-neutral-700 leading-relaxed">
                         {paragraph}
                       </p>
@@ -304,6 +246,11 @@ function App() {
               </div>
             </div>
           </section>
+        )}
+
+        {/* Features Section */}
+        {activeSection === 'features' && (
+          <CanvaFeaturesPage />
         )}
 
         {/* Contact Section */}

@@ -1,0 +1,20 @@
+# Amplify Commands
+
+# Install Amplify (run these one by one)
+npm install aws-amplify
+npm install @aws-amplify/ui-react
+
+# Initialize Amplify
+npx amplify init
+
+# Add authentication
+npx amplify add auth
+
+# Add API
+npx amplify add api
+
+# Push changes to AWS
+npx amplify push
+
+# Start local development
+npx amplify serve
