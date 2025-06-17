@@ -15,5 +15,14 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: true,
+  },
+  server: {
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      'devserver-preview--elportfoliotania.netlify.app',
+      'el-portfafolio.netlify.app',
+      '*.netlify.app'
+    ]
   }
 })
