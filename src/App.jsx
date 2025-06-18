@@ -1,11 +1,46 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from './components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card.jsx'
 import { Badge } from './components/ui/badge.jsx'
 import { Separator } from './components/ui/separator.jsx'
 import { Mail, Phone, Instagram, Linkedin, Eye, Palette, Scissors, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { editableContentStorage, optimizeImageUrl } from './lib/utils'
 import './App.css'
+
+// Error boundary component
+function ErrorBoundary({ children }) {
+  const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const errorHandler = (error) => {
+      setHasError(true);
+      setError(error);
+      console.error('UI Error caught:', error);
+    };
+
+    window.addEventListener('error', errorHandler);
+    return () => window.removeEventListener('error', errorHandler);
+  }, []);
+
+  if (hasError) {
+    return (
+      <div className="p-6 bg-red-50 border border-red-200 rounded-md m-4">
+        <h2 className="text-xl font-medium text-red-600 mb-2">Something went wrong</h2>
+        <p className="text-red-500 mb-4">The application encountered an error. Please try refreshing the page.</p>
+        <Button 
+          onClick={() => window.location.reload()} 
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          Refresh Page
+        </Button>
+      </div>
+    );
+  }
+
+  return children;
+}
 
 // Import assets
 import moodBoard1 from './assets/mood_board_1.png'
@@ -18,6 +53,20 @@ import technicalDrawing2 from './assets/technical_drawing_2.png'
 function App() {
   const { t } = useTranslation()
   const [activeSection, setActiveSection] = useState('home')
+  const [aboutContent, setAboutContent] = useState({
+    paragraphs: [
+      'With a passion for sustainable fashion and innovative design, I create collections that bridge the gap between contemporary aesthetics and timeless appeal. My work focuses on clean silhouettes, quality materials, and versatile pieces that empower the modern individual.',
+      'Drawing inspiration from minimalist architecture, natural textures, and cultural diversity, each design reflects a commitment to both style and substance. I believe fashion should be both beautiful and responsible, creating pieces that last beyond seasonal trends.'
+    ],
+    media: []
+  })
+
+  useEffect(() => {
+    const storedContent = editableContentStorage.load('aboutDesigner', null)
+    if (storedContent) {
+      setAboutContent(storedContent)
+    }
+  }, [])
 
   const sections = [
     { id: 'home', label: 'Home', icon: Eye },
@@ -64,8 +113,9 @@ function App() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100">
-      {/* Navigation */}
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100">
+        {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-200">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
@@ -125,18 +175,39 @@ function App() {
               <h2 className="text-4xl font-light text-neutral-900 mb-12 text-center">{t('About the Designer')}</h2>
               <Card className="bg-white/60 backdrop-blur-sm border-neutral-200">
                 <CardContent className="p-8">
-                  <p className="text-lg text-neutral-700 leading-relaxed mb-6">
-                    With a passion for sustainable fashion and innovative design, I create collections 
-                    that bridge the gap between contemporary aesthetics and timeless appeal. My work 
-                    focuses on clean silhouettes, quality materials, and versatile pieces that 
-                    empower the modern individual.
-                  </p>
-                  <p className="text-lg text-neutral-700 leading-relaxed mb-8">
-                    Drawing inspiration from minimalist architecture, natural textures, and cultural 
-                    diversity, each design reflects a commitment to both style and substance. I believe 
-                    fashion should be both beautiful and responsible, creating pieces that last beyond 
-                    seasonal trends.
-                  </p>
+                  {aboutContent.paragraphs.map((paragraph, index) => (
+                    <div key={index} className="mb-6">
+                      <p className="text-lg text-neutral-700 leading-relaxed">
+                        {paragraph}
+                      </p>
+                      
+                      {/* Media items positioned at this paragraph */}
+                      {aboutContent.media && aboutContent.media.filter(item => item.position === index).length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                          {aboutContent.media
+                            .filter(item => item.position === index)
+                            .map((item) => (
+                              <div key={item.id} className="rounded-lg overflow-hidden shadow-md">
+                                {item.type === 'image' ? (
+                                  <img 
+                                    src={item.url} 
+                                    alt={item.title || 'Designer image'}
+                                    className="w-full h-auto"
+                                  />
+                                ) : (
+                                  <video 
+                                    src={item.url}
+                                    className="w-full h-auto"
+                                    controls
+                                  />
+                                )}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="text-center">
                       <Palette className="mx-auto mb-3 text-neutral-600" size={32} />
@@ -188,9 +259,10 @@ function App() {
                         <div className="space-y-4">
                           <h4 className="font-semibold text-neutral-900">{t('Mood Board')}</h4>
                           <img 
-                            src={collection.moodBoard} 
+                            src={optimizeImageUrl(collection.moodBoard, 800)} 
                             alt={`${collection.title} mood board`}
                             className="w-full rounded-lg shadow-md"
+                            loading="lazy"
                           />
                         </div>
                       </div>
@@ -282,23 +354,16 @@ function App() {
                       <span>Atelier Design</span>
                     </button>
                   </div>
-                  <div className="mt-6 pt-6 border-t border-neutral-200">
-                    <a 
-                      href="/admin" 
-                      className="flex items-center justify-center px-4 py-2 bg-neutral-900 text-white rounded-md hover:bg-neutral-800 transition-colors"
-                    >
-                      {t('Admin Dashboard')}
-                    </a>
-                  </div>
+                  {/* Admin buttons removed */}
                 </CardContent>
               </Card>
             </div>
           </section>
         )}
       </main>
-    </div>
+      </div>
+    </ErrorBoundary>
   )
 }
 
 export default App
-

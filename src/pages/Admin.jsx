@@ -1,8 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../components/admin/AdminLayout';
 import CollectionDetail from '../components/admin/CollectionDetail';
+import ChangeHistory from '../components/admin/ChangeHistory';
+import EditableText from '../components/admin/EditableText';
+import AboutEditor from '../components/admin/AboutEditor';
+import DesignBoard from '../components/admin/DesignBoard';
+import MLDashboard from '../components/admin/MLDashboard';
 import api from '../services/api';
+import { editableContentStorage, changeTracker } from '../lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { Badge } from '../components/ui/badge.jsx';
@@ -12,6 +18,18 @@ import CollectionForm from '../components/admin/CollectionForm';
 
 export default function Admin() {
   const { t } = useTranslation();
+  const initialized = useRef(false);
+  
+  // State for editable content - moved to the top to fix initialization error
+  const [editableContent, setEditableContent] = useState(() => {
+    const defaultContent = {
+      designs: t('Design management coming soon'),
+      users: t('User management coming soon'),
+      settings: t('Settings coming soon')
+    };
+    return editableContentStorage.load('adminSections', defaultContent);
+  });
+  
   const [activeSection, setActiveSection] = useState('collections');
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,10 +41,12 @@ export default function Admin() {
     const fetchCollections = async () => {
       try {
         setLoading(true);
+        setError(null); // Clear previous errors
         const data = await api.getCollections();
         setCollections(data);
       } catch (err) {
-        setError(err.message);
+        console.error('Error fetching collections:', err);
+        setError(t('Failed to load collections. Please try again.'));
       } finally {
         setLoading(false);
       }
@@ -35,20 +55,32 @@ export default function Admin() {
     if (activeSection === 'collections' && !selectedCollectionId) {
       fetchCollections();
     }
-  }, [activeSection, selectedCollectionId]);
+  }, [activeSection, selectedCollectionId, t]);
+  
+  // Initialize editable content in localStorage if needed
+  useEffect(() => {
+    if (!initialized.current) {
+      // Make sure the editable content is saved to localStorage on first load
+      editableContentStorage.save('adminSections', editableContent);
+      initialized.current = true;
+    }
+  }, [editableContent]);
 
   const handleAddCollection = async (collectionData) => {
     try {
+      setError(null); // Clear previous errors
       const newCollection = await api.createCollection(collectionData);
       setCollections([...collections, newCollection]);
       setShowCollectionForm(false);
     } catch (err) {
-      setError(err.message);
+      console.error('Error creating collection:', err);
+      setError(t('Failed to create collection. Please try again.'));
     }
   };
 
   const handlePublishToggle = async (id, currentStatus) => {
     try {
+      setError(null); // Clear previous errors
       let updatedCollection;
       if (currentStatus === 'published') {
         updatedCollection = await api.unpublishCollection(id);
@@ -60,17 +92,21 @@ export default function Admin() {
         c.id === id ? updatedCollection : c
       ));
     } catch (err) {
-      setError(err.message);
+      console.error('Error toggling collection status:', err);
+      const action = currentStatus === 'published' ? 'unpublish' : 'publish';
+      setError(t(`Failed to ${action} collection. Please try again.`));
     }
   };
 
   const handleDeleteCollection = async (id) => {
     if (window.confirm(t('Are you sure you want to delete this collection?'))) {
       try {
+        setError(null); // Clear previous errors
         await api.deleteCollection(id);
         setCollections(collections.filter(c => c.id !== id));
       } catch (err) {
-        setError(err.message);
+        console.error('Error deleting collection:', err);
+        setError(t('Failed to delete collection. Please try again.'));
       }
     }
   };
@@ -123,12 +159,28 @@ export default function Admin() {
                 <Card key={collection.id} className="bg-white border-neutral-200">
                   <CardHeader className="flex flex-row items-start justify-between pb-2">
                     <div>
-                      <CardTitle 
-                        className="text-lg font-medium text-neutral-900 cursor-pointer hover:text-neutral-600"
-                        onClick={() => setSelectedCollectionId(collection.id)}
-                      >
-                        {collection.title}
-                      </CardTitle>
+                      <div className="flex items-center">
+                        <EditableText
+                          initialText={collection.title}
+                          onSave={(text) => {
+                            const updatedCollection = { ...collection, title: text };
+                            api.updateCollection(collection.id, { title: text })
+                              .then(updated => {
+                                setCollections(collections.map(c => 
+                                  c.id === collection.id ? updated : c
+                                ));
+                              })
+                              .catch(err => {
+                                console.error('Error updating collection title:', err);
+                                setError(t('Failed to update collection title.'));
+                              });
+                          }}
+                          className="text-lg font-medium text-neutral-900 cursor-pointer hover:text-neutral-600"
+                        />
+                        <span className="ml-2 cursor-pointer" onClick={() => setSelectedCollectionId(collection.id)}>
+                          →
+                        </span>
+                      </div>
                       <p className="text-sm text-neutral-500 mt-1">
                         {t('Last updated')}: {collection.lastUpdated}
                       </p>
@@ -138,7 +190,24 @@ export default function Admin() {
                     </Badge>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-neutral-600 mb-4">{collection.description}</p>
+                    <EditableText
+                      initialText={collection.description}
+                      onSave={(text) => {
+                        const updatedCollection = { ...collection, description: text };
+                        api.updateCollection(collection.id, { description: text })
+                          .then(updated => {
+                            setCollections(collections.map(c => 
+                              c.id === collection.id ? updated : c
+                            ));
+                          })
+                          .catch(err => {
+                            console.error('Error updating collection description:', err);
+                            setError(t('Failed to update collection description.'));
+                          });
+                      }}
+                      className="text-neutral-600 mb-4"
+                      multiline={true}
+                    />
                     <div className="flex items-center justify-between">
                       <div className="flex flex-wrap gap-2">
                         {collection.tags.map((tag) => (
@@ -189,55 +258,133 @@ export default function Admin() {
 
   const renderDashboardContent = () => {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-white border-neutral-200">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium text-neutral-900">{t('Total Collections')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{collections.length}</p>
-            <p className="text-sm text-neutral-500 mt-2">
-              {collections.filter(c => c.status === 'published').length} {t('published')}
-            </p>
-          </CardContent>
-        </Card>
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-white border-neutral-200">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-neutral-900">{t('Total Collections')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{collections.length}</p>
+              <p className="text-sm text-neutral-500 mt-2">
+                {collections.filter(c => c.status === 'published').length} {t('published')}
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-neutral-200">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-neutral-900">{t('Total Designs')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {collections.reduce((total, collection) => total + (collection.designs?.length || 0), 0)}
+              </p>
+              <p className="text-sm text-neutral-500 mt-2">
+                {t('Across all collections')}
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-neutral-200">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-neutral-900">{t('Website Visits')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">1,248</p>
+              <p className="text-sm text-neutral-500 mt-2">
+                +12% {t('from last month')}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
         
-        <Card className="bg-white border-neutral-200">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium text-neutral-900">{t('Total Designs')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {collections.reduce((total, collection) => total + (collection.designs?.length || 0), 0)}
-            </p>
-            <p className="text-sm text-neutral-500 mt-2">
-              {t('Across all collections')}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-white border-neutral-200">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium text-neutral-900">{t('Website Visits')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">1,248</p>
-            <p className="text-sm text-neutral-500 mt-2">
-              +12% {t('from last month')}
-            </p>
-          </CardContent>
-        </Card>
+        <div>
+          <h3 className="text-xl font-medium text-neutral-900 mb-4">{t('Activity')}</h3>
+          <ChangeHistory />
+        </div>
       </div>
     );
   };
+
+  const handleContentUpdate = (section, newText) => {
+    const updatedContent = {
+      ...editableContent,
+      [section]: newText
+    };
+    setEditableContent(updatedContent);
+    editableContentStorage.save('adminSections', updatedContent);
+    
+    // Track this change
+    changeTracker.trackChange('UPDATE_ADMIN_SECTION', {
+      section,
+      content: newText.substring(0, 50) + (newText.length > 50 ? '...' : '')
+    });
+  };
+
+  // Expose the editable content to the window object for console access
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.adminEditableContent = {
+        getContent: () => editableContent,
+        updateContent: (section, content) => {
+          if (editableContent[section] !== undefined) {
+            handleContentUpdate(section, content);
+            return true;
+          }
+          return false;
+        },
+        availableSections: Object.keys(editableContent)
+      };
+      
+      // Add console helper
+      console.log(
+        '%c Admin Console Available: %c Use window.adminEditableContent to access and modify content',
+        'background: #333; color: white; padding: 2px 4px; border-radius: 2px;',
+        'color: #333; font-weight: bold;'
+      );
+    }
+  }, [editableContent]);
 
   return (
     <AdminLayout activeSection={activeSection} setActiveSection={setActiveSection}>
       {activeSection === 'collections' && renderCollectionsContent()}
       {activeSection === 'dashboard' && renderDashboardContent()}
-      {activeSection === 'designs' && <p className="text-neutral-600">{t('Design management coming soon')}</p>}
-      {activeSection === 'users' && <p className="text-neutral-600">{t('User management coming soon')}</p>}
-      {activeSection === 'settings' && <p className="text-neutral-600">{t('Settings coming soon')}</p>}
+      {activeSection === 'about' && (
+        <div className="p-4">
+          <AboutEditor />
+        </div>
+      )}
+      {activeSection === 'designs' && (
+        <div className="p-4">
+          <DesignBoard />
+        </div>
+      )}
+      {activeSection === 'ml' && (
+        <div className="p-4">
+          <MLDashboard />
+        </div>
+      )}
+      {activeSection === 'users' && (
+        <div className="p-4">
+          <EditableText
+            initialText={editableContent.users}
+            onSave={(text) => handleContentUpdate('users', text)}
+            className="text-neutral-600"
+            multiline={true}
+          />
+        </div>
+      )}
+      {activeSection === 'settings' && (
+        <div className="p-4">
+          <EditableText
+            initialText={editableContent.settings}
+            onSave={(text) => handleContentUpdate('settings', text)}
+            className="text-neutral-600"
+            multiline={true}
+          />
+        </div>
+      )}
     </AdminLayout>
   );
 }

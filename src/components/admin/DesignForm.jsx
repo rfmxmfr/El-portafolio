@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { Button } from '../ui/button.jsx';
+import FeatureLibrary from './FeatureLibrary';
 
 export default function DesignForm({ onSubmit, onCancel, collectionId }) {
   const { t } = useTranslation();
@@ -14,6 +15,8 @@ export default function DesignForm({ onSubmit, onCancel, collectionId }) {
   const [detailInput, setDetailInput] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,6 +34,15 @@ export default function DesignForm({ onSubmit, onCancel, collectionId }) {
     }
   };
 
+  const handleSelectFeature = (feature) => {
+    if (!formData.details.includes(feature)) {
+      setFormData(prev => ({
+        ...prev,
+        details: [...prev.details, feature]
+      }));
+    }
+  };
+
   const handleRemoveDetail = (detailToRemove) => {
     setFormData(prev => ({
       ...prev,
@@ -41,12 +53,49 @@ export default function DesignForm({ onSubmit, onCancel, collectionId }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      processFile(file);
+    }
+  };
+
+  const processFile = (file) => {
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isDragging) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        processFile(file);
+      }
     }
   };
 
@@ -69,7 +118,7 @@ export default function DesignForm({ onSubmit, onCancel, collectionId }) {
         <CardTitle className="text-lg font-medium text-neutral-900">{t('Add New Design')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-1">
               {t('Design Title')}*
@@ -109,62 +158,93 @@ export default function DesignForm({ onSubmit, onCancel, collectionId }) {
             <input
               type="file"
               id="image"
+              ref={fileInputRef}
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+              className="hidden"
             />
-            {imagePreview && (
-              <div className="mt-2">
-                <img 
-                  src={imagePreview} 
-                  alt="Design preview" 
-                  className="max-h-40 rounded-md border border-neutral-200"
-                />
-              </div>
-            )}
+            <div
+              className={`border-2 border-dashed rounded-md p-6 text-center cursor-pointer transition-colors ${
+                isDragging 
+                  ? 'border-neutral-500 bg-neutral-50' 
+                  : imagePreview 
+                    ? 'border-green-300 bg-green-50' 
+                    : 'border-neutral-300 hover:border-neutral-400'
+              }`}
+              onClick={() => fileInputRef.current.click()}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              {imagePreview ? (
+                <div className="space-y-2">
+                  <img 
+                    src={imagePreview} 
+                    alt="Design preview" 
+                    className="max-h-40 mx-auto rounded-md"
+                  />
+                  <p className="text-sm text-green-600">{t('Image uploaded')}</p>
+                  <p className="text-xs text-neutral-500">{t('Click or drag to replace')}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <ImageIcon className="h-12 w-12 mx-auto text-neutral-400" />
+                  <p className="text-neutral-600">{t('Drag and drop an image here, or click to select')}</p>
+                  <p className="text-xs text-neutral-500">{t('Supports: JPG, PNG, GIF')}</p>
+                </div>
+              )}
+            </div>
           </div>
           
           <div>
-            <label htmlFor="details" className="block text-sm font-medium text-neutral-700 mb-1">
+            <label className="block text-sm font-medium text-neutral-700 mb-3">
               {t('Key Features')}
             </label>
-            <div className="flex">
-              <input
-                type="text"
-                id="details"
-                value={detailInput}
-                onChange={(e) => setDetailInput(e.target.value)}
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-l-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                placeholder={t('Add a feature')}
-              />
-              <button
-                type="button"
-                onClick={handleAddDetail}
-                className="px-4 py-2 bg-neutral-200 text-neutral-700 rounded-r-md hover:bg-neutral-300 transition-colors"
-              >
-                {t('Add')}
-              </button>
-            </div>
+            <FeatureLibrary onSelectFeature={handleSelectFeature} />
             
-            {formData.details.length > 0 && (
-              <ul className="mt-2 space-y-1">
-                {formData.details.map((detail, index) => (
-                  <li 
-                    key={index}
-                    className="flex items-center justify-between px-3 py-2 bg-neutral-50 rounded-md"
-                  >
-                    <span className="text-neutral-700">{detail}</span>
-                    <button 
-                      type="button" 
-                      onClick={() => handleRemoveDetail(detail)}
-                      className="text-neutral-500 hover:text-neutral-700"
-                    >
-                      <X size={16} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="mt-4">
+              <div className="flex">
+                <input
+                  type="text"
+                  id="details"
+                  value={detailInput}
+                  onChange={(e) => setDetailInput(e.target.value)}
+                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-l-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  placeholder={t('Add a custom feature')}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddDetail}
+                  className="px-4 py-2 bg-neutral-200 text-neutral-700 rounded-r-md hover:bg-neutral-300 transition-colors"
+                >
+                  {t('Add')}
+                </button>
+              </div>
+              
+              {formData.details.length > 0 && (
+                <div className="mt-3">
+                  <h4 className="text-sm font-medium text-neutral-700 mb-2">{t('Selected Features:')}</h4>
+                  <ul className="space-y-1">
+                    {formData.details.map((detail, index) => (
+                      <li 
+                        key={index}
+                        className="flex items-center justify-between px-3 py-2 bg-neutral-50 rounded-md"
+                      >
+                        <span className="text-neutral-700">{detail}</span>
+                        <button 
+                          type="button" 
+                          onClick={() => handleRemoveDetail(detail)}
+                          className="text-neutral-500 hover:text-neutral-700"
+                        >
+                          <X size={16} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
           
           <div className="flex justify-end space-x-2 pt-4">
@@ -178,6 +258,7 @@ export default function DesignForm({ onSubmit, onCancel, collectionId }) {
             </Button>
             <Button 
               type="submit" 
+              disabled={!imagePreview}
               className="bg-neutral-900 hover:bg-neutral-800 text-white"
             >
               {t('Add Design')}

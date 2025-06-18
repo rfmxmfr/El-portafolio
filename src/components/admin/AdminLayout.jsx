@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import api from '../../services/api';
 import { 
   LayoutDashboard, 
   Shirt, 
@@ -7,7 +8,9 @@ import {
   Settings, 
   Users, 
   LogOut,
-  Search
+  Search,
+  UserCircle,
+  Sparkles
 } from 'lucide-react';
 
 export default function AdminLayout({ children, activeSection, setActiveSection }) {
@@ -16,7 +19,9 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'collections', label: 'Collections', icon: Shirt },
+    { id: 'about', label: 'About', icon: UserCircle },
     { id: 'designs', label: 'Designs', icon: PenTool },
+    { id: 'ml', label: 'ML Dashboard', icon: Sparkles },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -50,7 +55,13 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
           </nav>
         </div>
         <div className="p-4 border-t border-neutral-200">
-          <button className="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-neutral-600 hover:bg-neutral-100 transition-colors">
+          <button 
+            onClick={() => {
+              api.logout();
+              window.location.href = '/login';
+            }}
+            className="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
+          >
             <LogOut size={18} className="mr-3" />
             {t('Logout')}
           </button>
@@ -65,7 +76,9 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
             <h2 className="text-lg font-medium text-neutral-900">
               {activeSection === 'collections' && t('Collections Management')}
               {activeSection === 'dashboard' && t('Dashboard Overview')}
+              {activeSection === 'about' && t('About the Designer')}
               {activeSection === 'designs' && t('Design Library')}
+              {activeSection === 'ml' && t('Machine Learning Dashboard')}
               {activeSection === 'users' && t('User Management')}
               {activeSection === 'settings' && t('System Settings')}
             </h2>

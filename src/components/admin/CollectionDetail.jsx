@@ -14,6 +14,8 @@ import { Button } from '../ui/button.jsx';
 import { Badge } from '../ui/badge.jsx';
 import { Separator } from '../ui/separator.jsx';
 import DesignForm from './DesignForm';
+import TagLibrary from './TagLibrary';
+import ImageGridGallery from './ImageGridGallery';
 import api from '../../services/api';
 
 export default function CollectionDetail({ collectionId, onBack }) {
@@ -26,7 +28,10 @@ export default function CollectionDetail({ collectionId, onBack }) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    tags: []
+    tags: [],
+    images: [],
+    moodBoard: null,
+    sketch: null
   });
 
   useEffect(() => {
@@ -35,10 +40,21 @@ export default function CollectionDetail({ collectionId, onBack }) {
         setLoading(true);
         const data = await api.getCollectionById(collectionId);
         setCollection(data);
+        
+        // Convert string tags to tag objects for compatibility with TagLibrary
+        const tagObjects = data.tags.map((tag, index) => ({
+          id: `tag-existing-${index}`,
+          name: tag,
+          color: 'bg-neutral-100 text-neutral-700'
+        }));
+        
         setFormData({
           title: data.title,
           description: data.description,
-          tags: [...data.tags]
+          tags: tagObjects,
+          images: data.images || [],
+          moodBoard: data.moodBoardUrl ? { url: data.moodBoardUrl } : null,
+          sketch: data.sketchUrl ? { url: data.sketchUrl } : null
         });
       } catch (err) {
         setError(err.message);
@@ -74,7 +90,15 @@ export default function CollectionDetail({ collectionId, onBack }) {
   const handleUpdateCollection = async (e) => {
     e.preventDefault();
     try {
-      const updatedCollection = await api.updateCollection(collectionId, formData);
+      const updateData = {
+        title: formData.title,
+        description: formData.description,
+        tags: formData.tags.map(tag => tag.name),
+        moodBoardUrl: formData.moodBoard?.url,
+        sketchUrl: formData.sketch?.url
+      };
+      
+      const updatedCollection = await api.updateCollection(collectionId, updateData);
       setCollection(updatedCollection);
       setEditMode(false);
     } catch (err) {
@@ -87,9 +111,50 @@ export default function CollectionDetail({ collectionId, onBack }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleTagChange = (e) => {
-    const tags = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);
-    setFormData(prev => ({ ...prev, tags }));
+  const handleSelectTag = (tag) => {
+    if (!formData.tags.find(t => t.id === tag.id)) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
+    }
+  };
+
+  const handleRemoveTag = (tagId) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag.id !== tagId)
+    }));
+  };
+
+  const handleAddImage = (image) => {
+    setFormData(prev => ({
+      ...prev,
+      images: [...prev.images, image]
+    }));
+  };
+
+  const handleDeleteImage = (imageId) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter(img => img.id !== imageId),
+      moodBoard: prev.moodBoard?.id === imageId ? null : prev.moodBoard,
+      sketch: prev.sketch?.id === imageId ? null : prev.sketch
+    }));
+  };
+
+  const handleSelectMoodBoard = (image) => {
+    setFormData(prev => ({
+      ...prev,
+      moodBoard: image
+    }));
+  };
+
+  const handleSelectSketch = (image) => {
+    setFormData(prev => ({
+      ...prev,
+      sketch: image
+    }));
   };
 
   const handlePublishToggle = async () => {
@@ -168,74 +233,127 @@ export default function CollectionDetail({ collectionId, onBack }) {
       </div>
 
       {editMode ? (
-        <Card className="bg-white border-neutral-200">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium text-neutral-900">{t('Edit Collection')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleUpdateCollection} className="space-y-4">
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-1">
-                  {t('Collection Title')}*
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">
-                  {t('Description')}*
-                </label>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                  rows={4}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="tags" className="block text-sm font-medium text-neutral-700 mb-1">
-                  {t('Tags')} ({t('comma separated')})
-                </label>
-                <input
-                  type="text"
-                  id="tags"
-                  value={formData.tags.join(', ')}
-                  onChange={handleTagChange}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                />
-              </div>
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setEditMode(false)}
-                  className="text-neutral-700 border-neutral-300 hover:bg-neutral-100"
-                >
-                  {t('Cancel')}
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="bg-neutral-900 hover:bg-neutral-800 text-white"
-                >
-                  {t('Save Changes')}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <Card className="bg-white border-neutral-200">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-neutral-900">{t('Edit Collection')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleUpdateCollection} className="space-y-6">
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-neutral-700 mb-1">
+                    {t('Collection Title')}*
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-neutral-700 mb-1">
+                    {t('Description')}*
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    required
+                    rows={4}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    {t('Tags')}
+                  </label>
+                  <TagLibrary onSelectTag={handleSelectTag} />
+                  
+                  {formData.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {formData.tags.map((tag) => (
+                        <Badge 
+                          key={tag.id} 
+                          className={`${tag.color} flex items-center gap-1`}
+                        >
+                          {tag.name}
+                          <button 
+                            type="button" 
+                            onClick={() => handleRemoveTag(tag.id)}
+                            className="text-neutral-500 hover:text-neutral-700"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    {t('Collection Images')}
+                  </label>
+                  <ImageGridGallery
+                    images={formData.images}
+                    onAddImage={handleAddImage}
+                    onDeleteImage={handleDeleteImage}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      {t('Mood Board')}
+                    </label>
+                    <ImageGridGallery
+                      images={formData.images}
+                      onSelectImage={handleSelectMoodBoard}
+                      selectable={true}
+                      selectedImage={formData.moodBoard?.id}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      {t('Design Sketch')}
+                    </label>
+                    <ImageGridGallery
+                      images={formData.images}
+                      onSelectImage={handleSelectSketch}
+                      selectable={true}
+                      selectedImage={formData.sketch?.id}
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setEditMode(false)}
+                    className="text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                  >
+                    {t('Cancel')}
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-neutral-900 hover:bg-neutral-800 text-white"
+                  >
+                    {t('Save Changes')}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
       ) : (
         <Card className="bg-white border-neutral-200">
           <CardHeader className="flex flex-row items-start justify-between pb-2">
