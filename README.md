@@ -6,15 +6,30 @@
 
 This comprehensive fashion design portfolio package includes everything you need to create a professional, editable portfolio. The package contains original content, design concepts, and detailed guidelines for customization.
 
+## 📁 Repository Structure
+
+The repository is organized as follows:
+
+```
+El-portafolio/
+├── src/                      # Source code
+│   ├── components/           # React components
+│   ├── assets/               # Static assets
+│   │   └── images/           # Image files
+│   ├── styles/               # CSS stylesheets
+│   ├── pages/                # Page components
+│   └── App.jsx               # Main application component
+├── public/                   # Public assets
+├── scripts/                  # Utility and deployment scripts
+├── docs/                     # Documentation files
+├── amplify/                  # AWS Amplify configuration
+└── new-custom-component/     # Custom component submodule
+```
+
 ### 📁 Included Files
 
 #### Original Design Assets
-- `mood_board_1.png` - Minimalist collection mood board
-- `mood_board_2.png` - Vibrant expression collection mood board
-- `fashion_sketch_1.png` - Minimalist women's outfit illustration
-- `fashion_sketch_2.png` - Vibrant women's outfit illustration
-- `technical_drawing_1.png` - Oversized linen blazer technical flat
-- `technical_drawing_2.png` - Ruffled silk blouse technical flat
+- Mood boards, fashion sketches, and technical drawings in `src/assets/images/`
 
 #### Interactive Web Portfolio
 - Complete React web application

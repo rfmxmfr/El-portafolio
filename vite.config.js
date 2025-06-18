@@ -16,6 +16,12 @@ export default defineConfig({
     sourcemap: false,
     minify: true,
   },
+  // Support for client-side routing in SPA
+  preview: {
+    port: 5173,
+    host: true,
+    strictPort: true,
+  },
   server: {
     allowedHosts: [
       'devserver-preview--elportfoliotania.netlify.app',
