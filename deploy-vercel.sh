@@ -4,14 +4,8 @@
 echo "Building frontend..."
 npm run build
 
-# Install Vercel CLI if not already installed
-if ! command -v vercel &> /dev/null; then
-  echo "Installing Vercel CLI..."
-  npm install -g vercel
-fi
-
-# Deploy to Vercel
+# Deploy using npx instead of global installation
 echo "Deploying to Vercel..."
-vercel --prod
+npx vercel --prod
 
 echo "Deployment complete!"
