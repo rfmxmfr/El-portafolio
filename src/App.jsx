@@ -26,6 +26,10 @@ function App() {
     { id: 'technical', label: 'Technical', icon: Scissors },
     { id: 'contact', label: 'Contact', icon: Mail }
   ]
+  
+  const handleDesignToolsClick = () => {
+    window.location.href = '/design-tools';
+  }
 
   const collections = [
     {
@@ -108,12 +112,20 @@ function App() {
               <p className="text-lg text-neutral-700 mb-12 max-w-2xl mx-auto leading-relaxed">
                 {t('Crafting contemporary fashion with a focus on sustainable materials, innovative silhouettes, and timeless elegance. Each piece tells a story of modern sophistication and conscious design.')}
               </p>
-              <Button 
-                onClick={() => setActiveSection('collections')}
-                className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 text-lg"
-              >
-                {t('Explore Collections')}
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  onClick={() => setActiveSection('collections')}
+                  className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 text-lg"
+                >
+                  {t('Explore Collections')}
+                </Button>
+                <Button 
+                  onClick={handleDesignToolsClick}
+                  className="bg-neutral-700 hover:bg-neutral-600 text-white px-8 py-3 text-lg"
+                >
+                  {t('Design Tools')}
+                </Button>
+              </div>
             </div>
           </section>
         )}

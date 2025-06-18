@@ -1,7 +1,14 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx';
-import { CheckCircle, Move, Resize, Type, Image, PenTool, Sliders, LayoutTemplate } from 'lucide-react';
-import './App.css'; // Ensure App.css styles are applied
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Move, 
+  Maximize2, 
+  Type, 
+  Image, 
+  PenTool, 
+  Sliders, 
+  LayoutGrid 
+} from 'lucide-react';
 
 function CanvaFeaturesPage() {
   // Define the features data as an array of objects
@@ -12,7 +19,7 @@ function CanvaFeaturesPage() {
       description: 'Easily move elements around the canvas to arrange your designs precisely.'
     },
     {
-      icon: Resize,
+      icon: Maximize2,
       title: 'Resize Handles',
       description: 'Adjust the dimensions of any item with intuitive resize handles for perfect scaling.'
     },
@@ -37,7 +44,7 @@ function CanvaFeaturesPage() {
       description: 'Enhance your images with a range of filters and effects to achieve the desired visual impact.'
     },
     {
-      icon: LayoutTemplate,
+      icon: LayoutGrid,
       title: 'Template Libraries',
       description: 'Start your designs quickly with a rich library of professional templates, maintaining consistent style.'
     }
@@ -75,5 +82,3 @@ function CanvaFeaturesPage() {
 }
 
 export default CanvaFeaturesPage;
-
-
