@@ -4,8 +4,8 @@
 echo "Building frontend..."
 npm run build
 
-# Deploy using npx instead of global installation
+# Deploy using npx with --yes flag
 echo "Deploying to Vercel..."
-npx vercel --prod
+npx vercel --prod --yes
 
 echo "Deployment complete!"
