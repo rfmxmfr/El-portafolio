@@ -1,4 +1,6 @@
 import { type ClientSchema, a, defineData } from '@aws-amplify/backend';
+import { handler as chatHandler } from './function/chat';
+import { handler as generateHandler } from './function/generate';
 
 // Define the schema
 const schema = a.schema({
@@ -33,13 +35,13 @@ const schema = a.schema({
       // Add conversation capability
       routes.conversation('/chat', {
         description: 'Chat with an AI assistant about fashion design',
-        functionName: 'fashionDesignChat'
+        handler: chatHandler
       });
       
       // Add generation capability
       routes.generation('/generate', {
         description: 'Generate fashion design ideas',
-        functionName: 'generateFashionIdeas'
+        handler: generateHandler
       });
     })
 });
