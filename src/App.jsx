@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Button } from './components/ui/button.jsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card.jsx'
-import { Badge } from './components/ui/badge.jsx'
-import { Separator } from './components/ui/separator.jsx'
+import { Button } from '@/components/ui/button.jsx'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
+import { Badge } from '@/components/ui/badge.jsx'
+import { Separator } from '@/components/ui/separator.jsx'
 import { Mail, Phone, Instagram, Linkedin, Eye, Palette, Scissors, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import './App.css'
@@ -26,10 +26,6 @@ function App() {
     { id: 'technical', label: 'Technical', icon: Scissors },
     { id: 'contact', label: 'Contact', icon: Mail }
   ]
-  
-  const handleDesignToolsClick = () => {
-    window.location.href = '/design-tools';
-  }
 
   const collections = [
     {
@@ -112,20 +108,12 @@ function App() {
               <p className="text-lg text-neutral-700 mb-12 max-w-2xl mx-auto leading-relaxed">
                 {t('Crafting contemporary fashion with a focus on sustainable materials, innovative silhouettes, and timeless elegance. Each piece tells a story of modern sophistication and conscious design.')}
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  onClick={() => setActiveSection('collections')}
-                  className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 text-lg"
-                >
-                  {t('Explore Collections')}
-                </Button>
-                <Button 
-                  onClick={handleDesignToolsClick}
-                  className="bg-neutral-700 hover:bg-neutral-600 text-white px-8 py-3 text-lg"
-                >
-                  {t('Design Tools')}
-                </Button>
-              </div>
+              <Button 
+                onClick={() => setActiveSection('collections')}
+                className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 text-lg"
+              >
+                {t('Explore Collections')}
+              </Button>
             </div>
           </section>
         )}
@@ -293,14 +281,6 @@ function App() {
                       <Linkedin size={24} />
                       <span>Atelier Design</span>
                     </button>
-                  </div>
-                  <div className="mt-6 pt-6 border-t border-neutral-200">
-                    <a 
-                      href="/admin" 
-                      className="flex items-center justify-center px-4 py-2 bg-neutral-900 text-white rounded-md hover:bg-neutral-800 transition-colors"
-                    >
-                      {t('Admin Dashboard')}
-                    </a>
                   </div>
                 </CardContent>
               </Card>

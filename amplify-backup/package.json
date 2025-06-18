@@ -1,12 +1,17 @@
 {
-  "name": "amplify-backend",
+  "name": "fashion-portfolio-backend",
   "version": "0.1.0",
-  "type": "module",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@aws-amplify/backend": "^0.10.0",
+    "@aws-amplify/backend-cli": "^0.9.2",
     "aws-cdk-lib": "^2.110.0",
     "constructs": "^10.3.0",
     "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "sandbox": "amplify sandbox",
+    "deploy": "amplify deploy"
   }
 }
