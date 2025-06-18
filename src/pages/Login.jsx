@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
 import { LogIn } from 'lucide-react';
-import api from '../services/api';
+import apiClient from '../services/apiClient';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -27,7 +27,7 @@ export default function Login() {
     setLoading(true);
     
     try {
-      await api.login(formData);
+      await apiClient.login(formData);
       navigate('/admin');
     } catch (err) {
       setError(err.message || 'Login failed');

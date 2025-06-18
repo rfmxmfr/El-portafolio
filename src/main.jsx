@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import './index.css'
 import './lib/i18n.js'
 import App from './App.jsx'
-import api from './services/api'
+import apiClient from './services/apiClient'
 
 // Lazy load components for better performance
 const Admin = lazy(() => import('./pages/Admin.jsx'))
@@ -13,7 +13,7 @@ const Login = lazy(() => import('./pages/Login.jsx'))
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
-  const user = api.getCurrentUser();
+  const user = apiClient.getCurrentUser();
   
   if (!user) {
     return <Navigate to="/login" replace />;
