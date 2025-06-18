@@ -6,7 +6,7 @@ import apiClient from './services/apiClient';
 const App = lazy(() => import('./App.jsx'));
 const Admin = lazy(() => import('./pages/Admin.jsx'));
 const AdminWithReactAdmin = lazy(() => import('./pages/AdminWithReactAdmin.jsx'));
-const Login = lazy(() => import('./pages/Login.jsx'));
+const FlipLogin = lazy(() => import('./pages/FlipLogin.jsx'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -42,7 +42,7 @@ const router = createBrowserRouter([
     path: '/login',
     element: (
       <Suspense fallback={<LoadingFallback />}>
-        <Login />
+        <FlipLogin />
       </Suspense>
     )
   },
