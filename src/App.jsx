@@ -354,6 +354,14 @@ function App() {
                       <span>Atelier Design</span>
                     </button>
                   </div>
+                  <div className="mt-8">
+                    <Button 
+                      onClick={() => window.location.href = '/admin'} 
+                      className="bg-neutral-900 hover:bg-neutral-800 text-white"
+                    >
+                      {t('Admin Dashboard')}
+                    </Button>
+                  </div>
                   {/* Admin buttons removed */}
                 </CardContent>
               </Card>
