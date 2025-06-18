@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { Button } from '../ui/button.jsx';
 import { Badge } from '../ui/badge.jsx';
 import TagLibrary from './TagLibrary';
 import ImageGridGallery from './ImageGridGallery';
+import LogoUploader from './LogoUploader';
+import AIPortfolioAssistant from './AIPortfolioAssistant';
 
 export default function CollectionForm({ onSubmit, onCancel }) {
   const { t } = useTranslation();
@@ -15,8 +17,11 @@ export default function CollectionForm({ onSubmit, onCancel }) {
     tags: [],
     images: [],
     moodBoard: null,
-    sketch: null
+    sketch: null,
+    logo: null,
+    aiGenerated: false
   });
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,7 +56,8 @@ export default function CollectionForm({ onSubmit, onCancel }) {
       ...prev,
       images: prev.images.filter(img => img.id !== imageId),
       moodBoard: prev.moodBoard?.id === imageId ? null : prev.moodBoard,
-      sketch: prev.sketch?.id === imageId ? null : prev.sketch
+      sketch: prev.sketch?.id === imageId ? null : prev.sketch,
+      logo: prev.logo?.id === imageId ? null : prev.logo
     }));
   };
 
@@ -68,6 +74,13 @@ export default function CollectionForm({ onSubmit, onCancel }) {
       sketch: image
     }));
   };
+  
+  const handleSelectLogo = (image) => {
+    setFormData(prev => ({
+      ...prev,
+      logo: image
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -77,6 +90,26 @@ export default function CollectionForm({ onSubmit, onCancel }) {
         tags: formData.tags.map(tag => tag.name)
       });
     }
+  };
+  
+  const handleApplyAIContent = (aiContent) => {
+    // Extract tags from AI content and convert to tag objects
+    const aiTags = aiContent.tags.map((tag, index) => ({
+      id: `ai-tag-${index}`,
+      name: tag,
+      color: 'bg-amber-100 text-amber-800'
+    }));
+    
+    setFormData(prev => ({
+      ...prev,
+      title: aiContent.title,
+      description: aiContent.description,
+      tags: [...prev.tags, ...aiTags.filter(tag => !prev.tags.some(t => t.name.toLowerCase() === tag.name.toLowerCase()))],
+      aiGenerated: true
+    }));
+    
+    // Hide AI assistant after applying
+    setShowAIAssistant(false);
   };
 
   return (
@@ -157,7 +190,7 @@ export default function CollectionForm({ onSubmit, onCancel }) {
               />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
                   {t('Mood Board')}
@@ -181,24 +214,75 @@ export default function CollectionForm({ onSubmit, onCancel }) {
                   selectedImage={formData.sketch?.id}
                 />
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  {t('Collection Logo')}
+                </label>
+                {formData.logo ? (
+                  <div className="relative border rounded-md p-4 text-center">
+                    <img 
+                      src={formData.logo.url} 
+                      alt="Collection logo" 
+                      className="max-h-32 mx-auto"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, logo: null }))}
+                      className="absolute top-2 right-2 bg-neutral-800 text-white rounded-full p-1"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <LogoUploader 
+                    onUpload={(logoData) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        logo: logoData
+                      }));
+                    }} 
+                  />
+                )}
+              </div>
             </div>
             
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onCancel}
-                className="text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+            <div className="flex justify-between items-center pt-4">
+              <Button
+                type="button"
+                onClick={() => setShowAIAssistant(!showAIAssistant)}
+                className="bg-amber-500 hover:bg-amber-600 text-white flex items-center"
               >
-                {t('Cancel')}
+                <Sparkles size={16} className="mr-2" />
+                {showAIAssistant ? t('Hide AI Assistant') : t('Use AI Assistant')}
               </Button>
-              <Button 
-                type="submit" 
-                className="bg-neutral-900 hover:bg-neutral-800 text-white"
-              >
-                {t('Create Collection')}
-              </Button>
+              
+              <div className="flex space-x-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onCancel}
+                  className="text-neutral-700 border-neutral-300 hover:bg-neutral-100"
+                >
+                  {t('Cancel')}
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-neutral-900 hover:bg-neutral-800 text-white"
+                >
+                  {t('Create Collection')}
+                </Button>
+              </div>
             </div>
+            
+            {showAIAssistant && (
+              <div className="mt-6">
+                <AIPortfolioAssistant 
+                  onApplyToCollection={handleApplyAIContent}
+                  collectionId="new-collection"
+                />
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>

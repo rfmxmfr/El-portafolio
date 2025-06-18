@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Masonry from 'react-masonry-css';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { Button } from '../ui/button.jsx';
-import { Image, Plus, Trash2, Check } from 'lucide-react';
+import { Image, Plus, Trash2, Check, Sparkles } from 'lucide-react';
 
 export default function ImageGridGallery({ 
   images = [], 
@@ -11,7 +11,8 @@ export default function ImageGridGallery({
   onDeleteImage, 
   onSelectImage,
   selectable = false,
-  selectedImage = null
+  selectedImage = null,
+  enableAI = true
 }) {
   const { t } = useTranslation();
   const [hoveredImage, setHoveredImage] = useState(null);
@@ -56,7 +57,29 @@ export default function ImageGridGallery({
         <CardTitle className="text-lg font-medium text-neutral-900">
           {t('Image Gallery')}
         </CardTitle>
-        <div>
+        <div className="flex space-x-2">
+          {enableAI && (
+            <Button
+              onClick={() => {
+                // Open AI image generation modal or trigger AI image generation
+                const aiGeneratedImage = {
+                  id: `ai-img-${Date.now()}`,
+                  url: 'https://placehold.co/600x800/png?text=AI+Generated+Image',
+                  name: 'AI Generated Image',
+                  type: 'image/png',
+                  size: 0,
+                  date: new Date().toISOString(),
+                  isAIGenerated: true
+                };
+                onAddImage(aiGeneratedImage);
+              }}
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+            >
+              <Sparkles size={16} className="mr-2" />
+              {t('AI Generate')}
+            </Button>
+          )}
+          
           <input
             type="file"
             id="gallery-upload"
@@ -98,12 +121,19 @@ export default function ImageGridGallery({
                 onMouseEnter={() => setHoveredImage(image.id)}
                 onMouseLeave={() => setHoveredImage(null)}
               >
-                <img
-                  src={image.url}
-                  alt={image.name || 'Gallery image'}
-                  className="w-full h-auto rounded-md"
-                  onClick={() => selectable && onSelectImage && onSelectImage(image)}
-                />
+                <div className="relative">
+                  <img
+                    src={image.url}
+                    alt={image.name || 'Gallery image'}
+                    className="w-full h-auto rounded-md"
+                    onClick={() => selectable && onSelectImage && onSelectImage(image)}
+                  />
+                  {image.isAIGenerated && (
+                    <div className="absolute top-2 right-2 bg-amber-500 text-white p-1 rounded-md">
+                      <Sparkles size={12} />
+                    </div>
+                  )}
+                </div>
                 
                 {(hoveredImage === image.id || (selectable && selectedImage === image.id)) && (
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-md">

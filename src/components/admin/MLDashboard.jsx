@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { Button } from '../ui/button.jsx';
@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs.jsx';
 import { Textarea } from '../ui/textarea.jsx';
 import { Input } from '../ui/input.jsx';
 import { Label } from '../ui/label.jsx';
-import { Loader2, Sparkles, MessageSquare, Image, RefreshCw } from 'lucide-react';
+import { Loader2, Sparkles, MessageSquare, Image, RefreshCw, Grid } from 'lucide-react';
 import { generateAI, conversationAI } from 'aws-amplify/ai';
+import DesignBoard from './DesignBoard';
 
 export default function MLDashboard() {
   const { t } = useTranslation();
@@ -18,6 +19,7 @@ export default function MLDashboard() {
   const [response, setResponse] = useState('');
   const [generatedImage, setGeneratedImage] = useState(null);
   const [chatHistory, setChatHistory] = useState([]);
+  const [savedDesigns, setSavedDesigns] = useState([]);
   const [mlModels, setMlModels] = useState([
     { id: 'fashion-gen', name: 'Fashion Generator', status: 'active', type: 'text' },
     { id: 'style-analyzer', name: 'Style Analyzer', status: 'active', type: 'text' },
@@ -87,13 +89,40 @@ export default function MLDashboard() {
       // Simulate image generation (in a real app, this would call the ML API)
       setTimeout(() => {
         // This is a placeholder - in a real app, you'd get the image URL from the API
-        setGeneratedImage('https://placehold.co/600x400/png?text=AI+Generated+Fashion+Design');
+        const imageUrl = 'https://placehold.co/600x400/png?text=AI+Generated+Fashion+Design';
+        setGeneratedImage(imageUrl);
         setLoading(false);
       }, 2000);
     } catch (error) {
       console.error('Error generating image:', error);
       setLoading(false);
     }
+  };
+  
+  // Function to save generated design to collection
+  const saveDesignToCollection = () => {
+    if (!generatedImage || !imagePrompt) return;
+    
+    const newDesign = {
+      id: `design-${Date.now()}`,
+      title: imagePrompt.substring(0, 30) + (imagePrompt.length > 30 ? '...' : ''),
+      description: imagePrompt,
+      imageUrl: generatedImage,
+      tags: imagePrompt.split(' ')
+        .filter(word => word.length > 3)
+        .slice(0, 5),
+      timestamp: new Date().toISOString(),
+      hasGeneratedImage: true
+    };
+    
+    setSavedDesigns([...savedDesigns, newDesign]);
+    
+    // Reset for next generation
+    setGeneratedImage(null);
+    setImagePrompt('');
+    
+    // Switch to designs tab
+    setActiveTab('designs');
   };
 
   return (
@@ -103,7 +132,7 @@ export default function MLDashboard() {
       </div>
 
       <Tabs defaultValue="generate" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-6">
+        <TabsList className="grid grid-cols-4 mb-6">
           <TabsTrigger value="generate" className="flex items-center">
             <Sparkles size={16} className="mr-2" />
             {t('Generate Ideas')}
@@ -115,6 +144,10 @@ export default function MLDashboard() {
           <TabsTrigger value="image" className="flex items-center">
             <Image size={16} className="mr-2" />
             {t('Generate Images')}
+          </TabsTrigger>
+          <TabsTrigger value="designs" className="flex items-center">
+            <Grid size={16} className="mr-2" />
+            {t('Saved Designs')}
           </TabsTrigger>
         </TabsList>
         
@@ -257,7 +290,10 @@ export default function MLDashboard() {
                     />
                   </div>
                   <div className="flex justify-end mt-2">
-                    <Button variant="outline" className="text-neutral-700 border-neutral-300 hover:bg-neutral-100">
+                    <Button 
+                      onClick={saveDesignToCollection}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
                       {t('Save to Collection')}
                     </Button>
                   </div>
@@ -265,6 +301,10 @@ export default function MLDashboard() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="designs" className="space-y-4">
+          <DesignBoard collectionId="ml-designs" />
         </TabsContent>
       </Tabs>
 
