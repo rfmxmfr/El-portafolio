@@ -1,89 +1,70 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api';
+// Create an axios instance for ML API calls
+const mlApiClient = axios.create({
+  baseURL: process.env.REACT_APP_ML_API_URL || 'http://localhost:8000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
 
-const mlApi = {
-  // Fashion Items
-  getFashionItems: async () => {
+// Add auth token interceptor
+mlApiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ML API service functions
+export const mlApiService = {
+  // Generate fashion design ideas
+  generateIdeas: async (prompt) => {
     try {
-      const response = await axios.get(`${API_URL}/fashion-items/`);
+      const response = await mlApiClient.post('/generate-ideas', { prompt });
       return response.data;
     } catch (error) {
-      console.error('Error fetching fashion items:', error);
+      console.error('Error generating ideas:', error);
       throw error;
     }
   },
-  
-  getFashionItem: async (id) => {
+
+  // Generate fashion design images
+  generateImage: async (prompt) => {
     try {
-      const response = await axios.get(`${API_URL}/fashion-items/${id}/`);
+      const response = await mlApiClient.post('/generate-image', { prompt });
       return response.data;
     } catch (error) {
-      console.error(`Error fetching fashion item ${id}:`, error);
+      console.error('Error generating image:', error);
       throw error;
     }
   },
-  
-  createFashionItem: async (data) => {
+
+  // Analyze fashion style
+  analyzeStyle: async (imageUrl) => {
     try {
-      // Create FormData for file upload
-      const formData = new FormData();
-      Object.keys(data).forEach(key => {
-        if (key === 'image' && data[key] instanceof File) {
-          formData.append(key, data[key]);
-        } else if (typeof data[key] === 'object') {
-          formData.append(key, JSON.stringify(data[key]));
-        } else {
-          formData.append(key, data[key]);
-        }
-      });
-      
-      const response = await axios.post(`${API_URL}/fashion-items/`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await mlApiClient.post('/analyze-style', { imageUrl });
       return response.data;
     } catch (error) {
-      console.error('Error creating fashion item:', error);
+      console.error('Error analyzing style:', error);
       throw error;
     }
   },
-  
-  analyzeFashionItem: async (id) => {
+
+  // Get ML model status
+  getModelStatus: async () => {
     try {
-      const response = await axios.post(`${API_URL}/fashion-items/${id}/analyze/`);
+      const response = await mlApiClient.get('/model-status');
       return response.data;
     } catch (error) {
-      console.error(`Error analyzing fashion item ${id}:`, error);
+      console.error('Error getting model status:', error);
       throw error;
     }
-  },
-  
-  getSimilarItems: async (id) => {
-    try {
-      const response = await axios.get(`${API_URL}/fashion-items/${id}/similar_items/`);
-      return response.data;
-    } catch (error) {
-      console.error(`Error getting similar items for ${id}:`, error);
-      throw error;
-    }
-  },
-  
-  // Style Recommendations
-  getRecommendations: async (sourceId = null) => {
-    try {
-      let url = `${API_URL}/recommendations/`;
-      if (sourceId) {
-        url += `?source_id=${sourceId}`;
-      }
-      const response = await axios.get(url);
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching recommendations:', error);
-      throw error;
-    }
-  },
+  }
 };
 
-export default mlApi;
+export default mlApiService;

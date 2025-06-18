@@ -61,6 +61,12 @@ El-portafolio/
 - Contact information
 - Admin dashboard for content management
 
+### AI & ML Features
+- **Fashion Design Idea Generator**: AI-powered tool to generate design concepts
+- **Fashion Design Assistant**: Interactive chat for fashion design guidance
+- **Fashion Image Generator**: Create visual representations of design ideas
+- **Style Analysis**: ML-powered analysis of fashion styles and trends
+
 ## 🛠️ How to Use This Package
 
 ### For Web Portfolio

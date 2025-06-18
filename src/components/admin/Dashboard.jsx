@@ -8,13 +8,15 @@ import {
   Users, 
   LogOut,
   Plus,
-  Search
+  Search,
+  Sparkles
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { Button } from '../ui/button.jsx';
 import { Badge } from '../ui/badge.jsx';
 import { Separator } from '../ui/separator.jsx';
 import CollectionForm from './CollectionForm';
+import MLDashboard from './MLDashboard';
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -54,6 +56,7 @@ export default function AdminDashboard() {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'collections', label: 'Collections', icon: Shirt },
     { id: 'designs', label: 'Designs', icon: PenTool },
+    { id: 'ai', label: 'AI & ML', icon: Sparkles },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -114,6 +117,7 @@ export default function AdminDashboard() {
               {activeSection === 'collections' && t('Collections Management')}
               {activeSection === 'dashboard' && t('Dashboard Overview')}
               {activeSection === 'designs' && t('Design Library')}
+              {activeSection === 'ai' && t('AI & ML Tools')}
               {activeSection === 'users' && t('User Management')}
               {activeSection === 'settings' && t('System Settings')}
             </h2>
@@ -244,8 +248,22 @@ export default function AdminDashboard() {
                   </p>
                 </CardContent>
               </Card>
+
+              <Card className="bg-white border-neutral-200">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium text-neutral-900">{t('AI Generated Designs')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">8</p>
+                  <p className="text-sm text-neutral-500 mt-2">
+                    +2 {t('this week')}
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           )}
+          
+          {activeSection === 'ai' && <MLDashboard />}
         </main>
       </div>
     </div>

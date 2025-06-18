@@ -6,7 +6,9 @@ import ChangeHistory from '../components/admin/ChangeHistory';
 import EditableText from '../components/admin/EditableText';
 import AboutEditor from '../components/admin/AboutEditor';
 import DesignBoard from '../components/admin/DesignBoard';
-import MLDashboard from '../components/admin/MLDashboard';
+import { lazy, Suspense } from 'react';
+// Lazy load the ML Dashboard for better performance
+const OptimizedMLDashboard = lazy(() => import('../components/admin/OptimizedMLDashboard'));
 import api from '../services/api';
 import { editableContentStorage, changeTracker } from '../lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
@@ -362,7 +364,14 @@ export default function Admin() {
       )}
       {activeSection === 'ml' && (
         <div className="p-4">
-          <MLDashboard />
+          <Suspense fallback={
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-neutral-200 rounded w-1/4"></div>
+              <div className="h-64 bg-neutral-100 rounded"></div>
+            </div>
+          }>
+            <OptimizedMLDashboard />
+          </Suspense>
         </div>
       )}
       {activeSection === 'users' && (
