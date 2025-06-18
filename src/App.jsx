@@ -6,7 +6,7 @@ import { Separator } from './components/ui/separator.jsx'
 import { Mail, Phone, Instagram, Linkedin, Eye, Palette, Scissors, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { editableContentStorage, optimizeImageUrl } from './lib/utils'
-import FlipCards from './components/FlipCards'
+import FullPageFlip from './components/FullPageFlip'
 import './App.css'
 
 // Error boundary component
@@ -120,7 +120,7 @@ function App() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-200">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-neutral-900">{t('ATELIER')}</h1>
+            <h1 className="text-2xl font-bold text-neutral-900">{t('TANIA ATELIER')}</h1>
             <div className="flex space-x-6">
               {sections.map((section) => {
                 const Icon = section.icon
@@ -148,28 +148,7 @@ function App() {
       <main className="pt-20">
         {/* Home Section */}
         {activeSection === 'home' && (
-          <section className="min-h-screen flex items-center justify-center px-6">
-            <div className="text-center max-w-4xl">
-              <h1 className="text-6xl md:text-8xl font-light text-neutral-900 mb-6">
-                {t('Fashion Design')}
-              </h1>
-              <h2 className="text-2xl md:text-3xl text-neutral-600 mb-8">
-                {t('Portfolio')}
-              </h2>
-              <p className="text-lg text-neutral-700 mb-12 max-w-2xl mx-auto leading-relaxed">
-                {t('Crafting contemporary fashion with a focus on sustainable materials, innovative silhouettes, and timeless elegance. Each piece tells a story of modern sophistication and conscious design.')}
-              </p>
-              <div className="mb-12">
-                <FlipCards />
-              </div>
-              <Button 
-                onClick={() => setActiveSection('collections')}
-                className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 text-lg"
-              >
-                {t('Explore Collections')}
-              </Button>
-            </div>
-          </section>
+          <FullPageFlip onExplore={() => setActiveSection('collections')} />
         )}
 
         {/* About Section */}
