@@ -6,6 +6,7 @@ import { Separator } from './components/ui/separator.jsx'
 import { Mail, Phone, Instagram, Linkedin, Eye, Palette, Scissors, Sparkles } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { editableContentStorage, optimizeImageUrl } from './lib/utils'
+import FlipCards from './components/FlipCards'
 import './App.css'
 
 // Error boundary component
@@ -158,6 +159,9 @@ function App() {
               <p className="text-lg text-neutral-700 mb-12 max-w-2xl mx-auto leading-relaxed">
                 {t('Crafting contemporary fashion with a focus on sustainable materials, innovative silhouettes, and timeless elegance. Each piece tells a story of modern sophistication and conscious design.')}
               </p>
+              <div className="mb-12">
+                <FlipCards />
+              </div>
               <Button 
                 onClick={() => setActiveSection('collections')}
                 className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-3 text-lg"
