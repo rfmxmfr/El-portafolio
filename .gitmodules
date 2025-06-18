@@ -1,0 +1,3 @@
+[submodule "new-custom-component"]
+	path = new-custom-component
+	url = https://github.com/tryretool/custom-component-collection-template
