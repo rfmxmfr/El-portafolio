@@ -15,6 +15,10 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: true,
+    rollupOptions: {
+      // Explicitly mark problematic modules as external
+      external: ['aws-amplify/ai']
+    }
   },
   // Support for client-side routing in SPA
   preview: {

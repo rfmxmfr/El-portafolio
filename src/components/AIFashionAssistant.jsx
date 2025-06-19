@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { generateAI, conversationAI } from 'aws-amplify/ai';
 
 export default function AIFashionAssistant() {
   const [prompt, setPrompt] = useState('');
@@ -13,17 +12,21 @@ export default function AIFashionAssistant() {
     
     setLoading(true);
     try {
-      const result = await generateAI({
-        model: 'AIAssistant',
-        route: '/generate',
-        input: prompt
-      });
-      
-      setResponse(result.response);
+      // Mock AI response
+      setTimeout(() => {
+        const ideas = [
+          "A sustainable collection featuring recycled materials with clean, minimalist lines",
+          "Versatile pieces that transition seamlessly from day to evening wear",
+          "Focus on natural dyes and locally-sourced fabrics for minimal environmental impact",
+          "Incorporate adjustable design elements to extend the garment lifecycle"
+        ];
+        
+        setResponse(ideas.join("\n\n"));
+        setLoading(false);
+      }, 1500);
     } catch (error) {
       console.error('Error generating ideas:', error);
       setResponse('Error generating ideas. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -34,19 +37,26 @@ export default function AIFashionAssistant() {
     
     setLoading(true);
     try {
-      const result = await conversationAI({
-        model: 'AIAssistant',
-        route: '/chat',
-        input: prompt
-      });
-      
-      const newMessage = {
-        user: prompt,
-        assistant: result.response
-      };
-      
-      setChatHistory([...chatHistory, newMessage]);
-      setPrompt('');
+      // Mock chat response
+      setTimeout(() => {
+        const responses = [
+          "That's an interesting design concept. Consider adding textural elements to enhance the visual appeal.",
+          "I recommend exploring a complementary color palette to make your design more cohesive.",
+          "Your idea has potential. Have you considered how this would translate to different body types?",
+          "This approach aligns well with current sustainable fashion trends."
+        ];
+        
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        
+        const newMessage = {
+          user: prompt,
+          assistant: randomResponse
+        };
+        
+        setChatHistory([...chatHistory, newMessage]);
+        setPrompt('');
+        setLoading(false);
+      }, 1000);
     } catch (error) {
       console.error('Error in chat:', error);
       setChatHistory([
@@ -56,7 +66,6 @@ export default function AIFashionAssistant() {
           assistant: 'Sorry, I encountered an error. Please try again.' 
         }
       ]);
-    } finally {
       setLoading(false);
     }
   };

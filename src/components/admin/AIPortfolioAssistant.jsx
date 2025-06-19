@@ -5,7 +5,6 @@ import { Button } from '../ui/button.jsx';
 import { Textarea } from '../ui/textarea.jsx';
 import { Label } from '../ui/label.jsx';
 import { Loader2, Sparkles, Save, Grid2X2, Grid3X3 } from 'lucide-react';
-import { mlApiService } from '../../services/mlApi';
 
 export default function AIPortfolioAssistant({ onApplyToCollection, collectionId }) {
   const { t } = useTranslation();
@@ -21,20 +20,33 @@ export default function AIPortfolioAssistant({ onApplyToCollection, collectionId
     
     setLoading(true);
     try {
-      const result = await mlApiService.generateIdeas(prompt);
-      
-      // Format the response into portfolio content
-      const content = {
-        title: `AI Generated: ${prompt.substring(0, 30)}...`,
-        description: result.ideas.join('\\n\\n'),
-        tags: extractKeywords(prompt),
-        timestamp: new Date().toISOString()
-      };
-      
-      setGeneratedContent(content);
+      // Mock AI response
+      setTimeout(() => {
+        // Generate a title based on the prompt
+        const title = `AI Generated: ${prompt.split(' ').slice(0, 5).join(' ')}...`;
+        
+        // Generate description paragraphs
+        const descriptions = [
+          `This collection explores ${prompt.toLowerCase()} through a contemporary lens, focusing on sustainable materials and timeless silhouettes.`,
+          `Each piece is designed to be versatile and adaptable, reflecting the modern individual's need for functionality without sacrificing style.`,
+          `The color palette draws inspiration from natural elements, creating a harmonious visual narrative throughout the collection.`
+        ];
+        
+        // Extract keywords for tags
+        const tags = extractKeywords(prompt);
+        
+        const content = {
+          title: title,
+          description: descriptions.join('\n\n'),
+          tags: tags,
+          timestamp: new Date().toISOString()
+        };
+        
+        setGeneratedContent(content);
+        setLoading(false);
+      }, 2000);
     } catch (error) {
       console.error('Error generating portfolio content:', error);
-    } finally {
       setLoading(false);
     }
   };
