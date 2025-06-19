@@ -13,6 +13,22 @@ A fashion portfolio application with AI and ML features.
 
 ## Deployment
 
+### Deploy to Netlify
+
+To deploy the application to Netlify:
+
+```bash
+./deploy-netlify.sh
+```
+
+This script will:
+1. Install dependencies
+2. Build the project
+3. Install Netlify CLI if needed
+4. Deploy to Netlify
+
+For detailed instructions, see [NETLIFY_DEPLOYMENT.md](NETLIFY_DEPLOYMENT.md).
+
 ### Deploy to Vercel
 
 To deploy the application to Vercel as a new app:
@@ -26,11 +42,9 @@ This script will:
 2. Log you in to Vercel
 3. Deploy the application as a new project
 
-### Login Credentials
+### Login
 
-After deployment, you can log in with:
-- Username: rmonteiro
-- Password: Junkie88
+After deployment, use the "Enter Dashboard" button on the login page to bypass authentication in this demo version.
 
 ## Local Development
 
@@ -68,3 +82,4 @@ Start frontend:
 - Express.js
 - Tailwind CSS
 - Vercel Serverless Functions
+- Netlify Deployment

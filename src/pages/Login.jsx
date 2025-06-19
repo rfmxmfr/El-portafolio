@@ -9,8 +9,8 @@ export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: 'rmonteiro@gmx.co.uk',
-    password: 'Junkie88'
+    email: '',
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -77,7 +77,7 @@ export default function Login() {
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                placeholder="rmonteiro@gmx.co.uk"
+                placeholder="email@example.com"
               />
             </div>
             
