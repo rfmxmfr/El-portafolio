@@ -3,12 +3,9 @@ import ReactDOM from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import App from './App.jsx'
 import Login from './pages/Login.jsx'
+import Admin from './pages/Admin.jsx'
 import './index.css'
 import './i18n.js'
-
-// Use lazy loading for admin pages to improve initial load time
-const Admin = lazy(() => import('./pages/Admin.jsx'))
-const AdminWithReactAdmin = lazy(() => import('./pages/AdminWithReactAdmin.jsx'))
 
 // Loading component for lazy-loaded routes
 const PageLoader = () => (
@@ -30,19 +27,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <Admin />
-      </Suspense>
-    )
-  },
-  {
-    path: '/admin-react',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <AdminWithReactAdmin />
-      </Suspense>
-    )
+    element: <Admin />
   }
 ])
 
