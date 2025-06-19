@@ -1,24 +1,18 @@
 #!/bin/bash
 
-echo "Deploying fixed version to Vercel..."
+echo "Deploying El-portafolio to Vercel..."
 
-# Login to Vercel first
-echo "Logging in to Vercel..."
-npx vercel login
+# Fix package-lock.json inconsistencies
+echo "Updating dependencies..."
+rm -f package-lock.json
+npm install
 
-# Commit changes
-git add .
-git commit -m "Fix build errors and implement client-side login"
-
-# Build the application
-echo "Building the application..."
+# Create optimized build
+echo "Building project..."
 npm run build
 
-# Deploy to Vercel
+# Deploy to Vercel using production settings
 echo "Deploying to Vercel..."
 npx vercel --prod
 
-echo "Deployment complete! The application with AI features is now live."
-echo "Use these credentials to log in:"
-echo "Email: admin@example.com"
-echo "Password: password123"
+echo "Deployment complete!"

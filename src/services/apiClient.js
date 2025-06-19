@@ -1,19 +1,57 @@
 import api from './api';
 
+// Global loading state tracker
+export const loadingStates = {
+  login: false,
+  logout: false,
+  collections: false,
+  designs: false,
+  // Add other API operations as needed
+};
+
+// Error handling helper
+const handleApiError = (error, operation) => {
+  const errorMessage = error.response?.data?.message || `${operation} failed`;
+  const statusCode = error.response?.status;
+  
+  // Log detailed error info for debugging
+  console.error(`API Error (${operation}):`, {
+    message: errorMessage,
+    status: statusCode,
+    details: error.response?.data,
+    originalError: error
+  });
+  
+  // Create error with additional metadata
+  const enhancedError = new Error(errorMessage);
+  enhancedError.statusCode = statusCode;
+  enhancedError.operation = operation;
+  enhancedError.timestamp = new Date().toISOString();
+  
+  return enhancedError;
+};
+
 // User authentication
 const login = async ({ email, password }) => {
+  loadingStates.login = true;
   try {
     const response = await api.post('/auth/login', { email, password });
     const { token, user } = response.data;
     
-    // Store token and user data
+    if (!token || !user) {
+      throw new Error('Invalid response from server');
+    }
+    
+    // Store token and user data securely
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('lastActive', Date.now().toString());
     
     return user;
   } catch (error) {
-    console.error('Login error:', error);
-    throw new Error(error.response?.data?.message || 'Login failed');
+    throw handleApiError(error, 'Login');
+  } finally {
+    loadingStates.login = false;
   }
 };
 

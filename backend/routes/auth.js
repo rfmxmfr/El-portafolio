@@ -98,36 +98,22 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
     
-    let user;
-    let isMatch = false;
+    // Find user by email or username
+    const user = await User.findOne({
+      $or: [
+        { email: email },
+        { username: email } // Allow login with username as well
+      ]
+    });
     
-    try {
-      // Try database operations
-      user = await User.findOne({ email });
-      
-      if (user) {
-        isMatch = await user.comparePassword(password);
-      }
-    } catch (dbError) {
-      // Mock login
-      console.log('Using mock user login');
-      
-      // Special case for rmonteiro/Junkie88
-      if (email === 'rmonteiro' && password === 'Junkie88') {
-        user = mockUsers.find(u => u.username === 'rmonteiro');
-        isMatch = true;
-      } else {
-        // Find user in mock data
-        user = mockUsers.find(u => u.email === email);
-        
-        if (user) {
-          // Compare password
-          isMatch = await bcrypt.compare(password, user.password);
-        }
-      }
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
     
-    if (!user || !isMatch) {
+    // Compare password
+    const isMatch = await user.comparePassword(password);
+    
+    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     
@@ -150,7 +136,8 @@ router.post('/login', async (req, res) => {
       token: token
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 

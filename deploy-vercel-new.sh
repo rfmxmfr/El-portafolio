@@ -2,19 +2,13 @@
 
 echo "Deploying El-portafolio to Vercel as a new app..."
 
-# Install Vercel CLI if not already installed
-if ! command -v vercel &> /dev/null; then
-    echo "Installing Vercel CLI..."
-    npm install -g vercel
-fi
-
-# Login to Vercel
+# Use npx to run Vercel CLI without installing globally
 echo "Logging in to Vercel..."
-vercel login
+npx vercel login
 
 # Deploy to Vercel
 echo "Deploying to Vercel..."
-vercel --prod
+npx vercel --prod
 
 echo "Deployment complete!"
 echo "Use these credentials to log in:"

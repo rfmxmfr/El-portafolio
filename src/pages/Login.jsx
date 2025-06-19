@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
-import { LogIn } from 'lucide-react';
-import apiClient from '../services/apiClient';
+import { LogIn, AlertCircle } from 'lucide-react';
+import apiClient, { loadingStates } from '../services/apiClient';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -21,22 +21,31 @@ export default function Login() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Use the global loading state
+  useEffect(() => {
+    setLoading(loadingStates.login);
+  }, [loadingStates.login]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
     
     try {
-      // Check for demo credentials
-      if (formData.email === 'rmonteiro' && formData.password === 'Junkie88') {
-        // Store mock user data for demo purposes
-        localStorage.setItem('user', JSON.stringify({
+      // Check for demo credentials - only allow in development
+      if (formData.email === 'rmonteiro' && formData.password === 'Junkie88' && 
+          import.meta.env.MODE !== 'production') {
+        // Store mock user data for demo purposes with expiration
+        const mockUser = {
           _id: 'demo-admin-id',
           username: 'rmonteiro',
           email: 'rmonteiro',
-          role: 'admin'
-        }));
-        localStorage.setItem('token', 'demo-token');
+          role: 'admin',
+          exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiration
+        };
+        
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        localStorage.setItem('token', `demo-token-${Date.now()}`);
+        localStorage.setItem('lastActive', Date.now().toString());
         
         // Navigate to admin dashboard
         navigate('/admin');
@@ -47,9 +56,15 @@ export default function Login() {
       await apiClient.login(formData);
       navigate('/admin');
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
+      
+      // Show more specific error messages based on status code
+      if (err.statusCode === 429) {
+        setError('Too many login attempts. Please try again later.');
+      } else if (err.statusCode === 403) {
+        setError('Account locked. Please contact support.');
+      }
     }
   };
 
@@ -104,8 +119,17 @@ export default function Login() {
               className="w-full bg-neutral-900 hover:bg-neutral-800 text-white"
               disabled={loading}
             >
-              <LogIn size={16} className="mr-2" />
-              {loading ? t('Logging in...') : t('Login')}
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('Logging in...')}
+                </>
+              ) : (
+                <>
+                  <LogIn size={16} className="mr-2" />
+                  {t('Login')}
+                </>
+              )}
             </Button>
             
             <div className="text-center text-sm text-neutral-500 mt-4">

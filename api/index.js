@@ -16,8 +16,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Generate JWT token
+const JWT_SECRET = process.env.JWT_SECRET || 'changeme-in-production';
+
 const generateToken = (id) => {
-  return jwt.sign({ id }, 'secret', {
+  if (!process.env.JWT_SECRET) {
+    console.warn('Warning: JWT_SECRET environment variable is not set. Using default insecure secret.');
+  }
+  return jwt.sign({ id }, JWT_SECRET, {
     expiresIn: '30d'
   });
 };
@@ -37,7 +42,7 @@ const auth = (req, res, next) => {
     }
     
     // Verify token
-    const decoded = jwt.verify(token, 'secret');
+    const decoded = jwt.verify(token, JWT_SECRET);
     
     // Find user
     const user = users.find(u => u._id === decoded.id);

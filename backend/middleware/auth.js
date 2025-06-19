@@ -6,44 +6,48 @@ module.exports = async (req, res, next) => {
   try {
     let token;
     
-    // Get token from header or cookie
+    // Get token from header only (more secure than cookies)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       token = req.headers.authorization.split(' ')[1];
-    } else if (req.cookies && req.cookies.token) {
-      token = req.cookies.token;
     }
     
     if (!token) {
       return res.status(401).json({ message: 'Not authorized, no token' });
     }
     
+    // Verify token with proper secret
+    let decoded;
     try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-      
-      try {
-        // Try to get user from database
-        req.user = await User.findById(decoded.id).select('-password');
-      } catch (dbError) {
-        // If database error, use mock data
-        console.log('Using mock user authentication');
-        req.user = mockUsers.find(u => u._id === decoded.id);
-        
-        // Special case for demo login
-        if (!req.user && decoded.id === 'demo-admin-id') {
-          req.user = mockUsers.find(u => u.username === 'rmonteiro');
-        }
+      // Ensure JWT_SECRET is set in production
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret && process.env.NODE_ENV === 'production') {
+        console.error('JWT_SECRET not set in production environment');
+        return res.status(500).json({ message: 'Server configuration error' });
       }
       
-      if (!req.user) {
-        return res.status(401).json({ message: 'Not authorized, invalid token' });
-      }
+      decoded = jwt.verify(token, jwtSecret || 'dev_secret_only_for_development');
       
-      next();
+      // Check token expiration explicitly
+      if (decoded.exp && Date.now() >= decoded.exp * 1000) {
+        return res.status(401).json({ message: 'Token expired' });
+      }
     } catch (error) {
       console.error('Token verification error:', error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      return res.status(401).json({ message: 'Not authorized, token failed' });
     }
+
+    // Get user from database
+    req.user = await User.findById(decoded.id).select('-password');
+    
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authorized, invalid token' });
+    }
+
+    next();
   } catch (error) {
     console.error('Auth middleware error:', error);
     res.status(500).json({ message: 'Server error' });

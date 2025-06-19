@@ -1,17 +1,4 @@
-import { Resource } from 'react-admin';
-import ReactAdminProvider from '../components/admin/ReactAdminProvider';
-import { CustomAdminLayout } from '../components/admin/CustomAdminLayout';
-import { Dashboard } from '../components/admin/resources/dashboard/Dashboard';
-import collections from '../components/admin/resources/collections';
-import designs from '../components/admin/resources/designs';
+import React, { Suspense } from 'react';
 
-export default function AdminWithReactAdmin() {
-  return (
-    <ReactAdminProvider>
-      <CustomAdminLayout dashboard={<Dashboard />}>
-        <Resource name="collections" {...collections} />
-        <Resource name="designs" {...designs} />
-      </CustomAdminLayout>
-    </ReactAdminProvider>
-  );
-}
+// Create a fallback component
+const AdminFallback = () => (\n  <div className=\"p-8 text-center\">\n    <h2 className=\"text-xl font-medium mb-4\">Loading Admin Interface...</h2>\n    <p>Please wait while the admin components are being loaded.</p>\n  </div>\n);\n\n// Use dynamic import to load react-admin components only when needed\nconst AdminComponent = React.lazy(() => import('../components/admin/ReactAdminWrapper'));\n\nexport default function AdminWithReactAdmin() {\n  return (\n    <Suspense fallback={<AdminFallback />}>\n      <AdminComponent />\n    </Suspense>\n  );\n}

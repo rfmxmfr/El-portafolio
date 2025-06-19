@@ -1,0 +1,46 @@
+# Development files
+.eslintrc.js
+.eslintrc.json
+.eslintrc.cjs
+.eslintignore
+.github
+.vscode
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# Build artifacts
+node_modules
+dist
+build
+coverage
+
+# Documentation
+docs
+*.md
+LICENSE
+
+# Configuration files
+*.config.js
+*.config.ts
+*.config.json
+!vercel.json
+!vite.config.js
+
+# Scripts
+*.sh
+debug-*
+deploy-*
+!deploy-vercel-optimized.sh
+
+# Local development
+.env.local
+.env.development
+.env.test
+
+# Backup and temp files
+*~
+*.bak
+*.swp
+*.tmp

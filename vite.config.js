@@ -1,11 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -16,22 +14,17 @@ export default defineConfig({
     sourcemap: false,
     minify: true,
     rollupOptions: {
-      // Explicitly mark problematic modules as external
-      external: ['aws-amplify/ai']
+      external: ['react-admin'],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-label', '@radix-ui/react-separator', '@radix-ui/react-slot', '@radix-ui/react-tabs'],
+        }
+      }
     }
   },
-  // Support for client-side routing in SPA
-  preview: {
+  server: {
     port: 5173,
     host: true,
-    strictPort: true,
-  },
-  server: {
-    allowedHosts: [
-      'devserver-preview--elportfoliotania.netlify.app',
-      // add other allowed hosts if needed
-    ],
-    // ...other server options
-  },
-  // ...other config
+  }
 })
