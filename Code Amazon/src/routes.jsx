@@ -4,9 +4,10 @@ import apiClient from './services/apiClient';
 
 // Lazy load components for better performance
 const App = lazy(() => import('./App.jsx'));
+const Login = lazy(() => import('./pages/Login.jsx'));
+const FlipLogin = lazy(() => import('./pages/FlipLogin.jsx'));
 const Admin = lazy(() => import('./pages/Admin.jsx'));
 const AdminWithReactAdmin = lazy(() => import('./pages/AdminWithReactAdmin.jsx'));
-const FlipLogin = lazy(() => import('./pages/FlipLogin.jsx'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -29,22 +30,22 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: (
-      <Suspense fallback={<LoadingFallback />}>
-        <App />
-      </Suspense>
-    )
-  },
+export const router = createBrowserRouter([
   {
     path: '/login',
     element: (
       <Suspense fallback={<LoadingFallback />}>
+        <Login />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/flip-login',
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
         <FlipLogin />
       </Suspense>
-    )
+    ),
   },
   {
     path: '/admin',
@@ -54,10 +55,10 @@ const router = createBrowserRouter([
           <Admin />
         </Suspense>
       </ProtectedRoute>
-    )
+    ),
   },
   {
-    path: '/admin-react',
+    path: '/admin/react-admin',
     element: (
       <ProtectedRoute>
         <Suspense fallback={<LoadingFallback />}>

@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
-import { springConfig, useCardAnimation } from '@/services/springConfig';
-import AnimatedCard from '@/components/ui/animated-card';
+import { springConfig, useCardAnimation } from '@/services/animationHooks';
+import { AnimatedCard } from '@/components/ui/animated-card';
 
 const Login = ({ onClose }) => {
   const { t } = useTranslation();

@@ -1,0 +1,17 @@
+{
+  "projectName": "fashion-portfolio",
+  "appId": "auto",
+  "envName": "dev",
+  "defaultEditor": "vscode",
+  "frontend": "javascript",
+  "javascript": {
+    "framework": "react",
+    "config": {
+      "SourceDir": "src",
+      "DistributionDir": "dist",
+      "BuildCommand": "npm run build",
+      "StartCommand": "npm run dev"
+    }
+  },
+  "providers": ["awscloudformation"]
+}

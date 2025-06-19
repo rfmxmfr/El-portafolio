@@ -1,0 +1,93 @@
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  role: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Collection {
+  id: ID!
+  name: String!
+  description: String
+  designs: [Design]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Design {
+  id: ID!
+  name: String!
+  description: String
+  imageUrl: String
+  tags: [Tag]
+  collection: Collection
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+  designs: [Design]
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type MLModel {
+  id: ID!
+  name: String!
+  type: String!
+  status: String!
+  lastUpdated: AWSDateTime!
+}
+
+type Mutation {
+  createUser(input: CreateUserInput!): User
+  createCollection(input: CreateCollectionInput!): Collection
+  createDesign(input: CreateDesignInput!): Design
+  createTag(input: CreateTagInput!): Tag
+  updateMLModelStatus(input: UpdateMLModelStatusInput!): MLModel
+}
+
+type Query {
+  getUser(id: ID!): User
+  listUsers: [User]
+  getCollection(id: ID!): Collection
+  listCollections: [Collection]
+  getDesign(id: ID!): Design
+  listDesigns: [Design]
+  getTag(id: ID!): Tag
+  listTags: [Tag]
+  getMLModel(id: ID!): MLModel
+  listMLModels: [MLModel]
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  role: String!
+}
+
+input CreateCollectionInput {
+  name: String!
+  description: String
+}
+
+input CreateDesignInput {
+  name: String!
+  description: String
+  imageUrl: String
+  collectionId: ID!
+  tagIds: [ID]
+}
+
+input CreateTagInput {
+  name: String!
+}
+
+input UpdateMLModelStatusInput {
+  id: ID!
+  status: String!
+}

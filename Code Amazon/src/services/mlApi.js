@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance for ML API calls
 const mlApiClient = axios.create({
-  baseURL: import.meta.env.VITE_ML_API_URL || '/api/ml',
+  baseURL: import.meta.env.VITE_ML_API_URL || 'http://localhost:3000/api/ml',
   headers: {
     'Content-Type': 'application/json',
   }

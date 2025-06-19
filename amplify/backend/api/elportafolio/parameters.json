@@ -1,0 +1,7 @@
+{
+  "name": "elportafolio",
+  "description": "API for El Portafolio",
+  "defaultAuthorizationMode": "API_KEY",
+  "apiKeyExpirationDays": 7,
+  "useDefaultAuthentication": true
+}

@@ -1,0 +1,11 @@
+{
+  "name": "mlservice",
+  "runtime": "nodejs18.x",
+  "timeout": 30,
+  "memorySize": 256,
+  "environment": {
+    "variables": {
+      "REGION": "us-east-1"
+    }
+  }
+}
