@@ -28,12 +28,12 @@ export default function Login() {
     
     try {
       // Check for demo credentials
-      if (formData.email === 'admin@example.com' && formData.password === 'password123') {
+      if (formData.email === 'rmonteiro' && formData.password === 'Junkie88') {
         // Store mock user data for demo purposes
         localStorage.setItem('user', JSON.stringify({
           _id: 'demo-admin-id',
-          username: 'admin',
-          email: 'admin@example.com',
+          username: 'rmonteiro',
+          email: 'rmonteiro',
           role: 'admin'
         }));
         localStorage.setItem('token', 'demo-token');
@@ -79,7 +79,7 @@ export default function Login() {
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
-                placeholder="admin@example.com"
+                placeholder="rmonteiro"
               />
             </div>
             
@@ -109,7 +109,7 @@ export default function Login() {
             </Button>
             
             <div className="text-center text-sm text-neutral-500 mt-4">
-              <p>{t('Use admin@example.com / password123')}</p>
+              <p>{t('Use rmonteiro / Junkie88')}</p>
             </div>
           </form>
         </CardContent>

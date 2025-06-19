@@ -301,6 +301,21 @@ export default function Admin() {
           
           <Card className="bg-white border-neutral-200">
             <CardHeader>
+              <CardTitle className="text-lg font-medium text-neutral-900">{t('React Admin')}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center">
+              <p className="text-neutral-600 mb-4">{t('Try the alternative dashboard')}</p>
+              <Button 
+                onClick={() => window.location.href = '/admin-react'}
+                className="bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                {t('Open React Admin')}
+              </Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-neutral-200">
+            <CardHeader>
               <CardTitle className="text-lg font-medium text-neutral-900">{t('Total Designs')}</CardTitle>
             </CardHeader>
             <CardContent>

@@ -43,13 +43,23 @@ app.get('/', (req, res) => {
   res.send('Fashion Portfolio API is running');
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// Connect to MongoDB with fallback to in-memory mode
+const startServer = () => {
+  // Start server
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Try to connect to MongoDB, but continue even if it fails
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('MongoDB connected');
+    startServer();
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    console.log('Starting server in memory-only mode (no database persistence)');
+    startServer();
+  });

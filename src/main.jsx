@@ -1,28 +1,34 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { RouterProvider } from 'react-router-dom'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import App from './App.jsx'
+import Login from './pages/Login.jsx'
+import Admin from './pages/Admin.jsx'
+import AdminWithReactAdmin from './pages/AdminWithReactAdmin.jsx'
 import './index.css'
-import './lib/i18n.js'
-import router from './routes'
+import './i18n.js'
 
-// Performance monitoring
-if (process.env.NODE_ENV === 'development') {
-  const reportWebVitals = (metric) => {
-    console.log(metric);
-  };
-  
-  // Add web vitals reporting
-  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-    getCLS(reportWebVitals);
-    getFID(reportWebVitals);
-    getFCP(reportWebVitals);
-    getLCP(reportWebVitals);
-    getTTFB(reportWebVitals);
-  });
-}
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />
+  },
+  {
+    path: '/login',
+    element: <Login />
+  },
+  {
+    path: '/admin',
+    element: <Admin />
+  },
+  {
+    path: '/admin-react',
+    element: <AdminWithReactAdmin />
+  }
+])
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>
+  </React.StrictMode>,
 )

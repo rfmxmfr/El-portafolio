@@ -36,8 +36,15 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
     <div className="flex h-screen bg-neutral-50">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-neutral-200 flex flex-col">
-        <div className="p-4 border-b border-neutral-200">
+        <div className="p-4 border-b border-neutral-200 flex items-center justify-between">
           <h1 className="text-xl font-bold text-neutral-900">{t('ATELIER ADMIN')}</h1>
+          <a href="/" title="Return to Home">
+            <img 
+              src="/robinxtania.png" 
+              alt="Robin x Tania" 
+              className="h-8 w-auto"
+            />
+          </a>
         </div>
         <div className="flex-1 overflow-auto py-4">
           <nav className="space-y-1 px-2">
@@ -94,11 +101,17 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
                   className="pl-10 pr-4 py-2 border border-neutral-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500"
                 />
               </div>
+              <a 
+                href="/admin-react" 
+                className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition-colors"
+              >
+                {t('React Admin')}
+              </a>
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-neutral-300 flex items-center justify-center text-neutral-700 font-medium">
-                  A
+                  R
                 </div>
-                <span className="text-sm font-medium text-neutral-700">Admin</span>
+                <span className="text-sm font-medium text-neutral-700">rmonteiro</span>
               </div>
             </div>
           </div>

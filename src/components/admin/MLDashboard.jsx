@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card.jsx';
 import { Button } from '../ui/button.jsx';
@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs.jsx';
 import { Textarea } from '../ui/textarea.jsx';
 import { Input } from '../ui/input.jsx';
 import { Label } from '../ui/label.jsx';
-import { Loader2, Sparkles, MessageSquare, Image, RefreshCw, Grid } from 'lucide-react';
+import { Loader2, Sparkles, MessageSquare, Image, RefreshCw, Grid, AlertTriangle } from 'lucide-react';
 import DesignBoard from './DesignBoard';
 
 export default function MLDashboard() {
@@ -20,10 +20,42 @@ export default function MLDashboard() {
   const [chatHistory, setChatHistory] = useState([]);
   const [savedDesigns, setSavedDesigns] = useState([]);
   const [mlModels, setMlModels] = useState([
-    { id: 'fashion-gen', name: 'Fashion Generator', status: 'active', type: 'text' },
-    { id: 'style-analyzer', name: 'Style Analyzer', status: 'active', type: 'text' },
-    { id: 'image-gen', name: 'Image Generator', status: 'active', type: 'image' }
+    { id: 'fashion-gen', name: 'Fashion Generator', status: 'checking', type: 'text' },
+    { id: 'style-analyzer', name: 'Style Analyzer', status: 'checking', type: 'text' },
+    { id: 'image-gen', name: 'Image Generator', status: 'checking', type: 'image' }
   ]);
+  const [mlServiceStatus, setMlServiceStatus] = useState('checking'); // 'checking', 'online', 'offline'
+  
+  // Check ML service status on component mount
+  useEffect(() => {
+    const checkMlService = async () => {
+      try {
+        // Import dynamically to avoid build issues
+        const { mlApiService } = await import('../../services/mlApi');
+        const result = await mlApiService.getModelStatus();
+        
+        if (result && result.models) {
+          // Convert the models object to an array
+          const modelArray = Object.entries(result.models).map(([id, data]) => ({
+            id,
+            name: id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+            status: data.status,
+            type: data.type
+          }));
+          
+          setMlModels(modelArray);
+          setMlServiceStatus('online');
+        } else {
+          setMlServiceStatus('offline');
+        }
+      } catch (error) {
+        console.error('Error checking ML service status:', error);
+        setMlServiceStatus('offline');
+      }
+    };
+    
+    checkMlService();
+  }, []);
 
   // Function to handle idea generation
   const handleGenerateIdeas = async () => {
@@ -31,21 +63,20 @@ export default function MLDashboard() {
     
     setLoading(true);
     try {
-      // Mock AI response instead of using AWS Amplify
-      setTimeout(() => {
-        const ideas = [
-          "A sustainable collection featuring recycled materials with clean, minimalist lines",
-          "Versatile pieces that transition seamlessly from day to evening wear",
-          "Focus on natural dyes and locally-sourced fabrics for minimal environmental impact",
-          "Incorporate adjustable design elements to extend the garment lifecycle"
-        ];
-        
-        setResponse(ideas.join("\n\n"));
-        setLoading(false);
-      }, 1500);
+      // Import dynamically to avoid build issues
+      const { mlApiService } = await import('../../services/mlApi');
+      const result = await mlApiService.generateIdeas(prompt);
+      
+      // Format the response
+      if (result.ideas && Array.isArray(result.ideas)) {
+        setResponse(result.ideas.join("\n\n"));
+      } else {
+        setResponse("No ideas generated. Please try a different prompt.");
+      }
     } catch (error) {
       console.error('Error generating ideas:', error);
       setResponse('Error generating ideas. Please try again.');
+    } finally {
       setLoading(false);
     }
   };
@@ -95,14 +126,21 @@ export default function MLDashboard() {
     
     setLoading(true);
     try {
-      // Mock image generation
-      setTimeout(() => {
-        // This is a placeholder - in a real app, you'd get the image URL from the API
-        setGeneratedImage('https://placehold.co/600x400/png?text=AI+Generated+Fashion+Design');
-        setLoading(false);
-      }, 2000);
+      // Import dynamically to avoid build issues
+      const { mlApiService } = await import('../../services/mlApi');
+      const result = await mlApiService.generateImage(imagePrompt);
+      
+      // Set the generated image URL
+      if (result.image_url) {
+        setGeneratedImage(result.image_url);
+      } else {
+        console.error('No image URL in response');
+        setGeneratedImage('https://placehold.co/600x400/png?text=Error+Generating+Image');
+      }
     } catch (error) {
       console.error('Error generating image:', error);
+      setGeneratedImage('https://placehold.co/600x400/png?text=Error+Generating+Image');
+    } finally {
       setLoading(false);
     }
   };
@@ -137,6 +175,24 @@ export default function MLDashboard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-medium text-neutral-900">{t('AI & ML Tools')}</h3>
+        {mlServiceStatus === 'checking' && (
+          <div className="flex items-center text-amber-500">
+            <Loader2 size={16} className="mr-2 animate-spin" />
+            <span>{t('Checking ML service...')}</span>
+          </div>
+        )}
+        {mlServiceStatus === 'offline' && (
+          <div className="flex items-center text-red-500">
+            <AlertTriangle size={16} className="mr-2" />
+            <span>{t('ML service offline - using mock data')}</span>
+          </div>
+        )}
+        {mlServiceStatus === 'online' && (
+          <div className="flex items-center text-green-500">
+            <Sparkles size={16} className="mr-2" />
+            <span>{t('ML service online')}</span>
+          </div>
+        )}
       </div>
 
       <Tabs defaultValue="generate" value={activeTab} onValueChange={setActiveTab} className="w-full">

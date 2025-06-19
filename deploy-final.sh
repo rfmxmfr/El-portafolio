@@ -21,8 +21,8 @@ if [ $? -eq 0 ]; then
   
   echo "Deployment complete! The application with AI features is now live."
   echo "Use these credentials to log in:"
-  echo "Email: admin@example.com"
-  echo "Password: password123"
+  echo "Username: rmonteiro"
+  echo "Password: Junkie88"
 else
   echo "Build failed. Please check the errors above."
   exit 1
