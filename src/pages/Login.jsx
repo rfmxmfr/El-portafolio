@@ -27,6 +27,23 @@ export default function Login() {
     setLoading(true);
     
     try {
+      // Check for demo credentials
+      if (formData.email === 'admin@example.com' && formData.password === 'password123') {
+        // Store mock user data for demo purposes
+        localStorage.setItem('user', JSON.stringify({
+          _id: 'demo-admin-id',
+          username: 'admin',
+          email: 'admin@example.com',
+          role: 'admin'
+        }));
+        localStorage.setItem('token', 'demo-token');
+        
+        // Navigate to admin dashboard
+        navigate('/admin');
+        return;
+      }
+      
+      // Try regular API login if not using demo credentials
       await apiClient.login(formData);
       navigate('/admin');
     } catch (err) {
@@ -92,7 +109,7 @@ export default function Login() {
             </Button>
             
             <div className="text-center text-sm text-neutral-500 mt-4">
-              <p>{t('Contact administrator for login credentials')}</p>
+              <p>{t('Use admin@example.com / password123')}</p>
             </div>
           </form>
         </CardContent>

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import api from '../../services/api';
 import { 
   LayoutDashboard, 
   Shirt, 
@@ -21,10 +20,17 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
     { id: 'collections', label: 'Collections', icon: Shirt },
     { id: 'about', label: 'About', icon: UserCircle },
     { id: 'designs', label: 'Designs', icon: PenTool },
-    { id: 'ml', label: 'ML Dashboard', icon: Sparkles },
+    { id: 'ai', label: 'AI & ML', icon: Sparkles },
     { id: 'users', label: 'Users', icon: Users },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
+
+  const handleLogout = () => {
+    // Clear local storage for demo logout
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
 
   return (
     <div className="flex h-screen bg-neutral-50">
@@ -56,10 +62,7 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
         </div>
         <div className="p-4 border-t border-neutral-200">
           <button 
-            onClick={() => {
-              api.logout();
-              window.location.href = '/login';
-            }}
+            onClick={handleLogout}
             className="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-neutral-600 hover:bg-neutral-100 transition-colors"
           >
             <LogOut size={18} className="mr-3" />
@@ -78,7 +81,7 @@ export default function AdminLayout({ children, activeSection, setActiveSection 
               {activeSection === 'dashboard' && t('Dashboard Overview')}
               {activeSection === 'about' && t('About the Designer')}
               {activeSection === 'designs' && t('Design Library')}
-              {activeSection === 'ml' && t('Machine Learning Dashboard')}
+              {activeSection === 'ai' && t('AI & ML Tools')}
               {activeSection === 'users' && t('User Management')}
               {activeSection === 'settings' && t('System Settings')}
             </h2>

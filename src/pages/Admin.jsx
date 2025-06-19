@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../components/admin/AdminLayout';
 import CollectionDetail from '../components/admin/CollectionDetail';
@@ -8,8 +9,8 @@ import AboutEditor from '../components/admin/AboutEditor';
 import DesignBoard from '../components/admin/DesignBoard';
 import { lazy, Suspense } from 'react';
 // Lazy load the ML Dashboard for better performance
-const OptimizedMLDashboard = lazy(() => import('../components/admin/OptimizedMLDashboard'));
-import api from '../services/api';
+const MLDashboard = lazy(() => import('../components/admin/MLDashboard'));
+import apiClient from '../services/apiClient';
 import { editableContentStorage, changeTracker } from '../lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.jsx';
 import { Button } from '../components/ui/button.jsx';
@@ -20,7 +21,16 @@ import CollectionForm from '../components/admin/CollectionForm';
 
 export default function Admin() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const initialized = useRef(false);
+  
+  // Check if user is logged in
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    }
+  }, [navigate]);
   
   // State for editable content - moved to the top to fix initialization error
   const [editableContent, setEditableContent] = useState(() => {
@@ -33,32 +43,40 @@ export default function Admin() {
   });
   
   const [activeSection, setActiveSection] = useState('collections');
-  const [collections, setCollections] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [collections, setCollections] = useState([
+    {
+      id: 'minimalist',
+      title: 'Minimalist Essentials',
+      description: 'Clean lines, neutral tones, and timeless silhouettes for the modern professional.',
+      status: 'published',
+      lastUpdated: '2025-06-15',
+      items: 12,
+      tags: ['Minimalist', 'Professional', 'Sustainable']
+    },
+    {
+      id: 'maximalist',
+      title: 'Vibrant Expression',
+      description: 'Bold colors, dramatic textures, and statement pieces for the confident individual.',
+      status: 'published',
+      lastUpdated: '2025-06-10',
+      items: 8,
+      tags: ['Bold', 'Luxury', 'Statement']
+    },
+    {
+      id: 'summer-draft',
+      title: 'Summer Breeze',
+      description: 'Light fabrics and airy silhouettes for the warm season.',
+      status: 'draft',
+      lastUpdated: '2025-06-01',
+      items: 5,
+      tags: ['Summer', 'Casual', 'Light']
+    }
+  ]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showCollectionForm, setShowCollectionForm] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState(null);
 
-  useEffect(() => {
-    const fetchCollections = async () => {
-      try {
-        setLoading(true);
-        setError(null); // Clear previous errors
-        const data = await api.getCollections();
-        setCollections(data);
-      } catch (err) {
-        console.error('Error fetching collections:', err);
-        setError(t('Failed to load collections. Please try again.'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (activeSection === 'collections' && !selectedCollectionId) {
-      fetchCollections();
-    }
-  }, [activeSection, selectedCollectionId, t]);
-  
   // Initialize editable content in localStorage if needed
   useEffect(() => {
     if (!initialized.current) {
@@ -70,8 +88,14 @@ export default function Admin() {
 
   const handleAddCollection = async (collectionData) => {
     try {
-      setError(null); // Clear previous errors
-      const newCollection = await api.createCollection(collectionData);
+      // For demo, just add to local state
+      const newCollection = {
+        ...collectionData,
+        id: `collection-${Date.now()}`,
+        status: 'draft',
+        lastUpdated: new Date().toISOString().split('T')[0],
+        items: 0
+      };
       setCollections([...collections, newCollection]);
       setShowCollectionForm(false);
     } catch (err) {
@@ -82,17 +106,11 @@ export default function Admin() {
 
   const handlePublishToggle = async (id, currentStatus) => {
     try {
-      setError(null); // Clear previous errors
-      let updatedCollection;
-      if (currentStatus === 'published') {
-        updatedCollection = await api.unpublishCollection(id);
-      } else {
-        updatedCollection = await api.publishCollection(id);
-      }
-      
-      setCollections(collections.map(c => 
-        c.id === id ? updatedCollection : c
-      ));
+      // For demo, just update local state
+      const updatedCollections = collections.map(c => 
+        c.id === id ? {...c, status: currentStatus === 'published' ? 'draft' : 'published'} : c
+      );
+      setCollections(updatedCollections);
     } catch (err) {
       console.error('Error toggling collection status:', err);
       const action = currentStatus === 'published' ? 'unpublish' : 'publish';
@@ -103,8 +121,7 @@ export default function Admin() {
   const handleDeleteCollection = async (id) => {
     if (window.confirm(t('Are you sure you want to delete this collection?'))) {
       try {
-        setError(null); // Clear previous errors
-        await api.deleteCollection(id);
+        // For demo, just update local state
         setCollections(collections.filter(c => c.id !== id));
       } catch (err) {
         console.error('Error deleting collection:', err);
@@ -115,11 +132,33 @@ export default function Admin() {
 
   const renderCollectionsContent = () => {
     if (selectedCollectionId) {
+      const collection = collections.find(c => c.id === selectedCollectionId);
       return (
-        <CollectionDetail 
-          collectionId={selectedCollectionId} 
-          onBack={() => setSelectedCollectionId(null)} 
-        />
+        <div className="space-y-4">
+          <Button 
+            onClick={() => setSelectedCollectionId(null)}
+            variant="outline"
+            className="mb-4"
+          >
+            ← {t('Back to Collections')}
+          </Button>
+          
+          <Card className="bg-white border-neutral-200">
+            <CardHeader>
+              <CardTitle>{collection?.title || 'Collection Detail'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{collection?.description}</p>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {collection?.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="bg-neutral-100 text-neutral-700">
+                    {t(tag)}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       );
     }
 
@@ -165,17 +204,10 @@ export default function Admin() {
                         <EditableText
                           initialText={collection.title}
                           onSave={(text) => {
-                            const updatedCollection = { ...collection, title: text };
-                            api.updateCollection(collection.id, { title: text })
-                              .then(updated => {
-                                setCollections(collections.map(c => 
-                                  c.id === collection.id ? updated : c
-                                ));
-                              })
-                              .catch(err => {
-                                console.error('Error updating collection title:', err);
-                                setError(t('Failed to update collection title.'));
-                              });
+                            const updatedCollections = collections.map(c => 
+                              c.id === collection.id ? {...c, title: text} : c
+                            );
+                            setCollections(updatedCollections);
                           }}
                           className="text-lg font-medium text-neutral-900 cursor-pointer hover:text-neutral-600"
                         />
@@ -195,17 +227,10 @@ export default function Admin() {
                     <EditableText
                       initialText={collection.description}
                       onSave={(text) => {
-                        const updatedCollection = { ...collection, description: text };
-                        api.updateCollection(collection.id, { description: text })
-                          .then(updated => {
-                            setCollections(collections.map(c => 
-                              c.id === collection.id ? updated : c
-                            ));
-                          })
-                          .catch(err => {
-                            console.error('Error updating collection description:', err);
-                            setError(t('Failed to update collection description.'));
-                          });
+                        const updatedCollections = collections.map(c => 
+                          c.id === collection.id ? {...c, description: text} : c
+                        );
+                        setCollections(updatedCollections);
                       }}
                       className="text-neutral-600 mb-4"
                       multiline={true}
@@ -279,11 +304,9 @@ export default function Admin() {
               <CardTitle className="text-lg font-medium text-neutral-900">{t('Total Designs')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">
-                {collections.reduce((total, collection) => total + (collection.designs?.length || 0), 0)}
-              </p>
+              <p className="text-3xl font-bold">24</p>
               <p className="text-sm text-neutral-500 mt-2">
-                {t('Across all collections')}
+                +3 {t('this month')}
               </p>
             </CardContent>
           </Card>
@@ -296,6 +319,18 @@ export default function Admin() {
               <p className="text-3xl font-bold">1,248</p>
               <p className="text-sm text-neutral-500 mt-2">
                 +12% {t('from last month')}
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-white border-neutral-200">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium text-neutral-900">{t('AI Generated Designs')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">8</p>
+              <p className="text-sm text-neutral-500 mt-2">
+                +2 {t('this week')}
               </p>
             </CardContent>
           </Card>
@@ -324,30 +359,6 @@ export default function Admin() {
     });
   };
 
-  // Expose the editable content to the window object for console access
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.adminEditableContent = {
-        getContent: () => editableContent,
-        updateContent: (section, content) => {
-          if (editableContent[section] !== undefined) {
-            handleContentUpdate(section, content);
-            return true;
-          }
-          return false;
-        },
-        availableSections: Object.keys(editableContent)
-      };
-      
-      // Add console helper
-      console.log(
-        '%c Admin Console Available: %c Use window.adminEditableContent to access and modify content',
-        'background: #333; color: white; padding: 2px 4px; border-radius: 2px;',
-        'color: #333; font-weight: bold;'
-      );
-    }
-  }, [editableContent]);
-
   return (
     <AdminLayout activeSection={activeSection} setActiveSection={setActiveSection}>
       {activeSection === 'collections' && renderCollectionsContent()}
@@ -362,7 +373,7 @@ export default function Admin() {
           <DesignBoard />
         </div>
       )}
-      {activeSection === 'ml' && (
+      {activeSection === 'ai' && (
         <div className="p-4">
           <Suspense fallback={
             <div className="animate-pulse space-y-4">
@@ -370,7 +381,7 @@ export default function Admin() {
               <div className="h-64 bg-neutral-100 rounded"></div>
             </div>
           }>
-            <OptimizedMLDashboard />
+            <MLDashboard />
           </Suspense>
         </div>
       )}
